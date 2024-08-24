@@ -5,6 +5,7 @@ import com.example.testproject.models.entities.Post;
 import com.example.testproject.models.models.CommentaryDTO;
 import com.example.testproject.models.models.PostDTO;
 import com.example.testproject.repositories.CommentaryRepository;
+import com.example.testproject.repositories.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -21,21 +22,30 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CommentaryService {
     private final CommentaryRepository commentaryRepository;
+    private final PostRepository postRepository;
 
-    public ResponseEntity getOneCommentaryToPost(Post post){
+    public ResponseEntity getOneCommentaryToPost(Integer id){
+        Post post = postRepository.findById(id).get();
         if (post.getCommentaries().isEmpty()){
             return ResponseEntity.ok().body("There are no commentaries yet");
         }
         return ResponseEntity.ok().body(new CommentaryDTO(commentaryRepository.findTopByPostOrderByCreatedAtDesc(post)));
     }
 
-    public ResponseEntity getTenCommentaryToPost(Post post, Integer offset){
+    public ResponseEntity getTenCommentaryToPost(Integer id, Integer offset){
 
         int pageSize = 10;
 
+        Post post = postRepository.findById(id).get();
+
         Pageable pageable = PageRequest.of(offset, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        List<CommentaryDTO> CommentaryDTOList = commentaryRepository.findByPostOrderByCreatedAtDesc(pageable, post).stream().map(CommentaryDTO::new).collect(Collectors.toList());
+        List<CommentaryDTO> CommentaryDTOList = commentaryRepository
+                .findByPostOrderByCreatedAtDesc(pageable, post)
+                .stream()
+                .map(CommentaryDTO::new)
+                .collect(Collectors
+                        .toList());
 
         return ResponseEntity.status(HttpStatus.OK).body(CommentaryDTOList);
     }
