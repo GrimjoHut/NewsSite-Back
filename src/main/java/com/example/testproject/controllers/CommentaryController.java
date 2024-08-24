@@ -24,4 +24,14 @@ public class CommentaryController {
     public ResponseEntity createComment(@RequestBody CommentaryDTO commentaryDTO, @RequestParam Integer post_id, @RequestParam Integer user_id){
         return commentaryService.createComment(commentaryDTO, user_id, post_id);
     }
+
+    @PutMapping("/changeComment/{id}")
+    public ResponseEntity changeComment(@RequestParam String text, @RequestParam Integer id){
+        return commentaryService.changeComment(id, text);
+    }
+
+    @DeleteMapping("/deleteComment")
+    public ResponseEntity deleteComment(@RequestParam Integer id){
+        return commentaryService.deleteComment(id);
+    }
 }

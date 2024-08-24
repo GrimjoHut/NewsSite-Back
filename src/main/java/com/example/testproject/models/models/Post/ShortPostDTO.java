@@ -1,25 +1,25 @@
 package com.example.testproject.models.models.Post;
 
 import com.example.testproject.models.entities.Post;
+import com.example.testproject.utils.DateCalculator;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 @Data
-public class PostDTO {
+public class ShortPostDTO {
     private Integer likes;
     private Integer dislikes;
     private String header;
     private String description;
     private String author;
-    private LocalDateTime createDate;
+    private String createDate;
 
-    public PostDTO(Post post){
+    public ShortPostDTO(Post post){
         this.likes = post.getLikes().size();
         this.dislikes = post.getDislikes().size();
         this.author = post.getUser().getNickname();
         this.header = post.getHeader();
-        this.description = post.getDescription();
-        this.createDate = post.getCreatedAt();
+        if (post.getDescription().length() < 400) this.description = post.getDescription();
+        else  this.description = post.getDescription().substring(0, 250) + "...";
+        this.createDate = DateCalculator.formatDate(post.getCreatedAt());
     }
 }

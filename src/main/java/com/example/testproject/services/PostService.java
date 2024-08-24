@@ -2,8 +2,9 @@ package com.example.testproject.services;
 
 import com.example.testproject.models.entities.Commentary;
 import com.example.testproject.models.entities.Post;
+import com.example.testproject.models.entities.User;
 import com.example.testproject.models.models.CommentaryDTO;
-import com.example.testproject.models.models.Post.PostDTO;
+import com.example.testproject.models.models.Post.ShortPostDTO;
 import com.example.testproject.models.models.Post.PostWithCommentDTO;
 import com.example.testproject.models.models.RequestDTO;
 import com.example.testproject.repositories.CommentaryRepository;
@@ -31,7 +32,7 @@ public class PostService {
     private final CommentaryRepository commentaryRepository;
 
     public ResponseEntity<List<PostWithCommentDTO>> getFivePosts(int offsetMultiplier) {
-        int pageSize = 5; // Установите размер страницы на 5, так как вы хотите отображать 5 постов
+        int pageSize = 5;
 
         Pageable pageable = PageRequest.of(offsetMultiplier, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
 
@@ -39,7 +40,6 @@ public class PostService {
 
         List<PostWithCommentDTO> postDTOList = posts.stream()
                 .map(post -> {
-                    // Получаем один комментарий для каждого поста
                     Commentary latestComment = commentaryRepository.findTopByPostOrderByCreatedAtDesc(post);
                     return new PostWithCommentDTO(post, new CommentaryDTO(latestComment));
                 })
@@ -49,7 +49,7 @@ public class PostService {
     }
 
     public ResponseEntity getPost(int id){
-        return ResponseEntity.status(HttpStatus.OK).body(new PostDTO(postRepository.findById(id)));
+        return ResponseEntity.status(HttpStatus.OK).body(new ShortPostDTO(postRepository.findById(id)));
     }
 
     public ResponseEntity createPost(RequestDTO requestDTO){
@@ -61,5 +61,52 @@ public class PostService {
         post.setCreatedAt(localDateTime);
         postRepository.save(post);
         return ResponseEntity.ok().build();
+    }
+
+    public ResponseEntity deletePost(Integer id){
+        postRepository.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+
+    public ResponseEntity<?> likePost(Integer userId, Integer postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+        if (post.getLikes().contains(user)) {
+            post.getLikes().remove(user);
+            postRepository.save(post);
+            return ResponseEntity.ok("Like removed");
+        }
+
+        if (post.getDislikes().contains(user)) {
+            post.getDislikes().remove(user);
+        }
+
+        post.getLikes().add(user);
+        postRepository.save(post);
+        return ResponseEntity.ok("Like added");
+    }
+
+    public ResponseEntity<?> dislikePost(Integer userId, Integer postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+        if (post.getDislikes().contains(user)) {
+            post.getDislikes().remove(user);
+            postRepository.save(post);
+            return ResponseEntity.ok("Dislike removed");
+        }
+
+        if (post.getLikes().contains(user)) {
+            post.getLikes().remove(user);
+        }
+
+        post.getDislikes().add(user);
+        postRepository.save(post);
+        return ResponseEntity.ok("Dislike added");
     }
 }

@@ -3,10 +3,9 @@ package com.example.testproject.models.models.Post;
 import com.example.testproject.models.entities.Commentary;
 import com.example.testproject.models.entities.Post;
 import com.example.testproject.models.models.CommentaryDTO;
+import com.example.testproject.utils.DateCalculator;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-import java.util.stream.Collectors;
 
 @Data
 public class PostWithCommentDTO {
@@ -16,7 +15,7 @@ public class PostWithCommentDTO {
     private String description;
     private CommentaryDTO commentaryDTO;
     private String author;
-    private LocalDateTime createDate;
+    private String createDate;
 
     public PostWithCommentDTO(Post post, CommentaryDTO commentaryDTO){
         this.likes = post.getLikes().size();
@@ -25,6 +24,6 @@ public class PostWithCommentDTO {
         this.header = post.getHeader();
         this.description = post.getDescription();
         this.commentaryDTO = commentaryDTO;
-        this.createDate = post.getCreatedAt();
+        this.createDate = DateCalculator.formatDate(post.getCreatedAt());
     }
 }

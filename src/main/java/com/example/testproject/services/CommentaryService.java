@@ -2,6 +2,7 @@ package com.example.testproject.services;
 
 import com.example.testproject.models.entities.Commentary;
 import com.example.testproject.models.entities.Post;
+import com.example.testproject.models.entities.User;
 import com.example.testproject.models.models.CommentaryDTO;
 import com.example.testproject.repositories.CommentaryRepository;
 import com.example.testproject.repositories.PostRepository;
@@ -51,6 +52,20 @@ public class CommentaryService {
         commentary.setPost(postRepository.findById(post_id).get());
         commentary.setDescription(commentaryDTO.getText());
         commentary.setUser(userRepository.findById(user_id).get());
+        commentaryRepository.save(commentary);
+        return ResponseEntity.ok().build();
+    }
+
+    public ResponseEntity deleteComment(Integer id){
+        commentaryRepository.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+
+    public ResponseEntity changeComment(Integer id, String text){
+        LocalDateTime localDateTime = LocalDateTime.now();
+        Commentary commentary = commentaryRepository.findById(id).get();
+        commentary.setDescription(text);
+        commentary.setCreatedAt(localDateTime);
         commentaryRepository.save(commentary);
         return ResponseEntity.ok().build();
     }
