@@ -2,6 +2,7 @@ package com.example.testproject.models.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "commentaries")
+@NoArgsConstructor
 public class Commentary{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

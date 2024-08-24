@@ -1,8 +1,8 @@
 package com.example.testproject.controllers;
 
 
-import com.example.testproject.models.entities.Post;
-import com.example.testproject.models.models.PostDTO;
+import com.example.testproject.models.models.Post.PostWithCommentDTO;
+import com.example.testproject.models.models.Post.PostDTO;
 import com.example.testproject.models.models.RequestDTO;
 import com.example.testproject.services.PostService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping("/posts")
-    public ResponseEntity<List<PostDTO>> getPosts(@RequestParam Integer offset){
+    public ResponseEntity<List<PostWithCommentDTO>> getPosts(@RequestParam Integer offset){
         return postService.getFivePosts(offset);
     }
 

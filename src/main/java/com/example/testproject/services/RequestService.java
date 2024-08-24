@@ -1,7 +1,6 @@
 package com.example.testproject.services;
 
 import com.example.testproject.models.entities.Request;
-import com.example.testproject.models.models.PostDTO;
 import com.example.testproject.models.models.RequestDTO;
 import com.example.testproject.repositories.RequestRepository;
 import com.example.testproject.repositories.UserRepository;
@@ -12,7 +11,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDateTime;
 import java.util.List;

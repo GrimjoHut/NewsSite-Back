@@ -3,11 +3,10 @@ package com.example.testproject.services;
 import com.example.testproject.models.entities.Commentary;
 import com.example.testproject.models.entities.Post;
 import com.example.testproject.models.models.CommentaryDTO;
-import com.example.testproject.models.models.PostDTO;
 import com.example.testproject.repositories.CommentaryRepository;
 import com.example.testproject.repositories.PostRepository;
+import com.example.testproject.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -15,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import org.springframework.data.domain.Pageable;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,16 +24,9 @@ import java.util.stream.Collectors;
 public class CommentaryService {
     private final CommentaryRepository commentaryRepository;
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
 
-    public ResponseEntity getOneCommentaryToPost(Integer id){
-        Post post = postRepository.findById(id).get();
-        if (post.getCommentaries().isEmpty()){
-            return ResponseEntity.ok().body("There are no commentaries yet");
-        }
-        return ResponseEntity.ok().body(new CommentaryDTO(commentaryRepository.findTopByPostOrderByCreatedAtDesc(post)));
-    }
-
-    public ResponseEntity getTenCommentaryToPost(Integer id, Integer offset){
+    public ResponseEntity<List<CommentaryDTO>> getTenCommentaryToPost(Integer id, Integer offset){
 
         int pageSize = 10;
 
@@ -48,5 +42,16 @@ public class CommentaryService {
                         .toList());
 
         return ResponseEntity.status(HttpStatus.OK).body(CommentaryDTOList);
+    }
+
+    public ResponseEntity createComment(CommentaryDTO commentaryDTO, Integer user_id, Integer post_id){
+        LocalDateTime localDateTime = LocalDateTime.now();
+        Commentary commentary = new Commentary();
+        commentary.setCreatedAt(localDateTime);
+        commentary.setPost(postRepository.findById(post_id).get());
+        commentary.setDescription(commentaryDTO.getText());
+        commentary.setUser(userRepository.findById(user_id).get());
+        commentaryRepository.save(commentary);
+        return ResponseEntity.ok().build();
     }
 }
