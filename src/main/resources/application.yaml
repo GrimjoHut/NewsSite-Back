@@ -1,5 +1,6 @@
 server:
   port: 8070
+
 spring:
   sql:
     init:
@@ -10,11 +11,16 @@ spring:
     username: postgres
     password: 07072003Bogdan
   jpa:
-    openInView: true
+    open-in-view: true
     show-sql: false
-    generateDdl: true
+    generate-ddl: true
     database: postgresql
-    databasePlatform: org.hibernate.dialect.PostgreSQLDialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     properties:
       hibernate:
         enable_lazy_load_no_trans: true
+
+  servlet:
+    multipart:
+      max-file-size: 10MB        # Максимальный размер загружаемого файла
+      max-request-size: 10MB     # Максимальный размер всего запроса

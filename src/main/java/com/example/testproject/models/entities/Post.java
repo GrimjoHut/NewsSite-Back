@@ -52,4 +52,10 @@ public class Post {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private List<User> dislikes = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "post_images", joinColumns = @JoinColumn(name = "post_id"))
+    @Column(name = "image_url", length = 1000)
+    private List<String> imageUrls = new ArrayList<>();
 }
+

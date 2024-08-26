@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,27 +42,40 @@ public class PostService {
         List<PostWithCommentDTO> postDTOList = posts.stream()
                 .map(post -> {
                     Commentary latestComment = commentaryRepository.findTopByPostOrderByCreatedAtDesc(post);
-                    return new PostWithCommentDTO(post, new CommentaryDTO(latestComment));
+                    CommentaryDTO commentaryDTO = latestComment != null ? new CommentaryDTO(latestComment) : null;
+                    return new PostWithCommentDTO(post, commentaryDTO);
                 })
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(postDTOList);
     }
 
+
     public ResponseEntity getPost(int id){
         return ResponseEntity.status(HttpStatus.OK).body(new ShortPostDTO(postRepository.findById(id)));
     }
 
-    public ResponseEntity createPost(RequestDTO requestDTO){
+    public ResponseEntity<?> createPost(RequestDTO requestDTO) {
         LocalDateTime localDateTime = LocalDateTime.now();
         Post post = new Post();
         post.setHeader(requestDTO.getHeader());
         post.setDescription(requestDTO.getDescription());
-        post.setUser(userRepository.findById(requestDTO.getUser().getId()).get());
+        post.setUser(userRepository.findById(requestDTO.getUser().getId())
+                .orElseThrow(() -> new RuntimeException("User not found")));
         post.setCreatedAt(localDateTime);
+
+        // Инициализация новой коллекции изображений
+        List<String> imageUrls = new ArrayList<>();
+        if (requestDTO.getImageUrls() != null) {
+            imageUrls.addAll(requestDTO.getImageUrls());
+        }
+        post.setImageUrls(imageUrls);
+
         postRepository.save(post);
         return ResponseEntity.ok().build();
     }
+
+
 
     public ResponseEntity deletePost(Integer id){
         postRepository.deleteById(id);

@@ -1,6 +1,5 @@
 package com.example.testproject.controllers;
 
-
 import com.example.testproject.models.models.Post.PostWithCommentDTO;
 import com.example.testproject.models.models.Post.ShortPostDTO;
 import com.example.testproject.models.models.RequestDTO;
@@ -18,32 +17,32 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping("/posts")
-    public ResponseEntity<List<PostWithCommentDTO>> getPosts(@RequestParam Integer offset){
+    public ResponseEntity<List<PostWithCommentDTO>> getPosts(@RequestParam Integer offset) {
         return postService.getFivePosts(offset);
     }
 
-    @GetMapping("/post")
-    public ResponseEntity<ShortPostDTO> getPost(@RequestParam Integer id){
+    @GetMapping("/post/{id}")
+    public ResponseEntity<ShortPostDTO> getPost(@PathVariable Integer id) {
         return postService.getPost(id);
     }
 
     @PostMapping("/new_post")
-    public ResponseEntity createPost(@RequestBody RequestDTO requestDTO){
+    public ResponseEntity<?> createPost(@RequestBody RequestDTO requestDTO) {
         return postService.createPost(requestDTO);
     }
 
     @DeleteMapping("/delete_post")
-    public ResponseEntity deletePost(@RequestParam Integer id){
+    public ResponseEntity<?> deletePost(@RequestParam Integer id) {
         return postService.deletePost(id);
     }
 
     @PutMapping("/like_post")
-    public ResponseEntity likePost(@RequestParam Integer user_id, @RequestParam Integer post_id){
-        return likePost(user_id, post_id);
+    public ResponseEntity<?> likePost(@RequestParam Integer userId, @RequestParam Integer postId) {
+        return postService.likePost(userId, postId);
     }
 
     @PutMapping("/dislike_post")
-    public ResponseEntity dislikePost(@RequestParam Integer user_id, @RequestParam Integer post_id){
-        return dislikePost(user_id, post_id);
+    public ResponseEntity<?> dislikePost(@RequestParam Integer userId, @RequestParam Integer postId) {
+        return postService.dislikePost(userId, postId);
     }
 }

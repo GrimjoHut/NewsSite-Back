@@ -1,7 +1,6 @@
 package com.example.testproject.models.entities;
 
 import com.example.testproject.models.enums.RoleEnum;
-import com.example.testproject.models.models.UserDTO;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,8 +18,11 @@ public class User {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "nickname")
+    @Column(name = "nickname", unique = true)
     private String nickname;
+
+    @Column(name = "password")
+    private String password;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))

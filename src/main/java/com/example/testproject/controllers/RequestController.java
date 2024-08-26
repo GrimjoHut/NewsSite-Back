@@ -1,12 +1,11 @@
 package com.example.testproject.controllers;
 
-import com.example.testproject.models.entities.Request;
 import com.example.testproject.models.models.RequestDTO;
-import com.example.testproject.repositories.RequestRepository;
 import com.example.testproject.services.RequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.util.List;
@@ -17,9 +16,11 @@ public class RequestController {
 
     private final RequestService requestService;
 
-    @PostMapping("/newRequest")
-    public ResponseEntity createRequest(@RequestBody RequestDTO requestDTO){
-        return requestService.createRequest(requestDTO);
+    @PostMapping(value = "/newRequest", consumes = {"multipart/form-data"})
+    public ResponseEntity createRequest(
+            @RequestPart("request") RequestDTO requestDTO,
+            @RequestPart("files") List<MultipartFile> files) throws Exception {
+        return requestService.createRequest(requestDTO, files);
     }
 
     @GetMapping("/request/{id}")
@@ -33,7 +34,7 @@ public class RequestController {
     }
 
     @PostMapping("/accept_request/{id}")
-    public ResponseEntity acceptRequest(Integer id){
+    public ResponseEntity acceptRequest(@PathVariable Integer id){
         return requestService.acceptRequest(id);
     }
 

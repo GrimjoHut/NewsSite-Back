@@ -6,6 +6,8 @@ import com.example.testproject.models.models.CommentaryDTO;
 import com.example.testproject.utils.DateCalculator;
 import lombok.Data;
 
+import java.util.List;
+
 
 @Data
 public class PostWithCommentDTO {
@@ -16,6 +18,7 @@ public class PostWithCommentDTO {
     private CommentaryDTO commentaryDTO;
     private String author;
     private String createDate;
+    private List<String> imageUrls;
 
     public PostWithCommentDTO(Post post, CommentaryDTO commentaryDTO){
         this.likes = post.getLikes().size();

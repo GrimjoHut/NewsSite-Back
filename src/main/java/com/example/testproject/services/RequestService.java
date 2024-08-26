@@ -10,7 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,14 +26,19 @@ public class RequestService {
     private final RequestRepository requestRepository;
     private final UserRepository userRepository;
     private final PostService postService;
+    private final ImageService imageService;
 
-    public ResponseEntity createRequest(RequestDTO requestDTO) {
+    public ResponseEntity createRequest(RequestDTO requestDTO, List<MultipartFile> files) throws Exception {
         LocalDateTime localDateTime = LocalDateTime.now();
         Request request = new Request();
         request.setCreatedAt(localDateTime);
         request.setUser(userRepository.findById(requestDTO.getUser().getId()).get());
         request.setHeader(requestDTO.getHeader());
         request.setDescription(requestDTO.getDescription());
+        for (MultipartFile file : files) {
+            String imageUrl = imageService.uploadImage(file, "image-bucket");
+            request.getImageUrls().add(imageUrl);
+        }
         requestRepository.save(request);
         return ResponseEntity.ok().build();
     }
@@ -65,9 +71,15 @@ public class RequestService {
     }
 
     public ResponseEntity acceptRequest(Integer id){
-        postService.createPost(new RequestDTO(requestRepository.findById(id).get()));
-        this.deleteRequest(id);
-        return ResponseEntity.ok().build();
+        Optional<Request> optionalRequest = requestRepository.findById(id);
+        if (optionalRequest.isPresent()) {
+            RequestDTO requestDTO = new RequestDTO(optionalRequest.get());
+            postService.createPost(requestDTO);
+            this.deleteRequest(id);
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Request not found");
+        }
     }
 
     public ResponseEntity deleteRequest(Integer id){

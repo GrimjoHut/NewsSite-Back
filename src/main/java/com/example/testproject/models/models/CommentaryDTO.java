@@ -15,8 +15,10 @@ public class CommentaryDTO {
 
 
     public CommentaryDTO(Commentary commentary){
-        this.text = commentary.getDescription();
-        this.author = commentary.getUser().getNickname();
-        this.createdAt = commentary.getCreatedAt();
+        if (commentary != null) {
+            this.text = commentary.getDescription();
+            this.author = commentary.getUser().getNickname();
+            this.createdAt = commentary.getCreatedAt();
+        }
     }
 }
