@@ -1,9 +1,8 @@
-package com.example.testproject.models.models.Post;
+package com.example.testproject.models.DTO.Post;
 
-import com.example.testproject.models.entities.Commentary;
 import com.example.testproject.models.entities.Post;
-import com.example.testproject.models.models.CommentaryDTO;
-import com.example.testproject.utils.DateCalculator;
+import com.example.testproject.models.DTO.CommentaryDTO;
+import com.example.testproject.utils.DateCalculatorUtil;
 import lombok.Data;
 
 import java.util.List;
@@ -27,6 +26,6 @@ public class PostWithCommentDTO {
         this.header = post.getHeader();
         this.description = post.getDescription();
         this.commentaryDTO = commentaryDTO;
-        this.createDate = DateCalculator.formatDate(post.getCreatedAt());
+        this.createDate = DateCalculatorUtil.formatDate(post.getCreatedAt());
     }
 }

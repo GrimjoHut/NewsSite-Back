@@ -1,24 +1,17 @@
 package com.example.testproject.configs;
 
+
+import com.example.testproject.Security.JWTAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -29,19 +22,48 @@ public class SecurityConfig {
             "/api/v1/auth/**",
             "/v2/api-docs",
             "/v3/api-docs",
-            "/v3/api-docs/**",
-            "/swagger-resources",
             "/swagger-resources/**",
-            "/configuration/ui",
-            "/configuration/security",
             "/swagger-ui/**",
             "/webjars/**",
-            "/swagger-ui.html"
     };
+
+    private static final String[] EVERYBODY_URLS = {
+            "/login",
+            "/registration",
+            "/commentariesToPost/{id}",
+            "/posts",
+            "/post/{id}",
+    };
+
+    private static final String[] ADMIN_URLS = {
+            "/giveRole",
+            "/takeRole"
+    };
+
+    private static final String[] USER_URLS = {
+            "/createComment",
+            "/changeComment/{id}",
+            "/deleteComment",
+            "/delete_post",
+            "/like_post",
+            "/dislike_post",
+            "/newRequest",
+    };
+
+    private static final String[] MODER_URLS = {
+            "/new_post",
+            "/accept_request/{id}",
+            "/reject_request/{id}",
+            "/request/{id}",
+            "/requests",
+    };
+
+
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity.getSharedObject(AuthenticationManagerBuilder.class).build();
     }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -52,17 +74,13 @@ public class SecurityConfig {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/login").permitAll().requestMatchers(WHITE_LIST_URL)
-                            .permitAll();
-                    auth.requestMatchers("/createNewUser").permitAll();
+                    auth.requestMatchers(WHITE_LIST_URL).permitAll();
+                    auth.requestMatchers(MODER_URLS).hasRole("MODER");
+                    auth.requestMatchers(ADMIN_URLS).hasRole("ADMIN");
+                    auth.requestMatchers(USER_URLS).hasRole("USER");
                     auth.anyRequest().authenticated();
                 })
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JWTAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .build();
-    }
-
-    @Bean
-    public JWTAuthenticationFilter jwtAuthenticationFilter(){
-        return new JWTAuthenticationFilter();
     }
 }

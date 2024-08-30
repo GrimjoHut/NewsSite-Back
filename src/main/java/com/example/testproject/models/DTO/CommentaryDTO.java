@@ -1,4 +1,4 @@
-package com.example.testproject.models.models;
+package com.example.testproject.models.DTO;
 
 import com.example.testproject.models.entities.Commentary;
 import lombok.AllArgsConstructor;

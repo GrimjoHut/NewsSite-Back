@@ -2,8 +2,9 @@ package com.example.testproject.services;
 
 import com.example.testproject.models.entities.Commentary;
 import com.example.testproject.models.entities.Post;
+import com.example.testproject.models.DTO.CommentaryDTO;
 import com.example.testproject.models.entities.User;
-import com.example.testproject.models.models.CommentaryDTO;
+import com.example.testproject.models.enums.RoleEnum;
 import com.example.testproject.repositories.CommentaryRepository;
 import com.example.testproject.repositories.PostRepository;
 import com.example.testproject.repositories.UserRepository;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,9 +58,22 @@ public class CommentaryService {
         return ResponseEntity.ok().build();
     }
 
-    public ResponseEntity deleteComment(Integer id){
-        commentaryRepository.deleteById(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity deleteComment(Integer commentId, Integer userId) {
+        Optional<Commentary> commentaryOpt = commentaryRepository.findById(commentId);
+        if (commentaryOpt.isPresent()) {
+            Commentary commentary = commentaryOpt.get();
+            User user = userRepository.findById(userId).get();
+
+            // Проверяем, является ли пользователь владельцем комментария или модератором
+            if (commentary.getUser().getId().equals(userId) || user.getRoles().contains(RoleEnum.MODER)) {
+                commentaryRepository.deleteById(commentId);
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You don't have permission to delete this comment");
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Comment not found");
+        }
     }
 
     public ResponseEntity changeComment(Integer id, String text){

@@ -1,7 +1,6 @@
 package com.example.testproject.controllers;
 
-import com.example.testproject.models.entities.Post;
-import com.example.testproject.models.models.CommentaryDTO;
+import com.example.testproject.models.DTO.CommentaryDTO;
 import com.example.testproject.services.CommentaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +30,7 @@ public class CommentaryController {
     }
 
     @DeleteMapping("/deleteComment")
-    public ResponseEntity deleteComment(@RequestParam Integer id){
-        return commentaryService.deleteComment(id);
+    public ResponseEntity deleteComment(@RequestParam Integer id, @RequestParam Integer userId){
+        return commentaryService.deleteComment(id, userId);
     }
 }

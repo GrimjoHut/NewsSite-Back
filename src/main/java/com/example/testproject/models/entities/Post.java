@@ -1,6 +1,5 @@
 package com.example.testproject.models.entities;
 
-import com.example.testproject.models.models.RequestDTO;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

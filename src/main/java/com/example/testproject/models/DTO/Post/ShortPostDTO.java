@@ -1,8 +1,8 @@
-package com.example.testproject.models.models.Post;
+package com.example.testproject.models.DTO.Post;
 
 import com.example.testproject.models.entities.Post;
-import com.example.testproject.models.models.UserDTO;
-import com.example.testproject.utils.DateCalculator;
+import com.example.testproject.models.DTO.UserDTO;
+import com.example.testproject.utils.DateCalculatorUtil;
 import lombok.Data;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public class ShortPostDTO {
         this.author = new UserDTO(post.getUser()); // Используем UserDTO
         this.header = post.getHeader();
         this.description = post.getDescription().length() < 400 ? post.getDescription() : post.getDescription().substring(0, 250) + "...";
-        this.createDate = DateCalculator.formatDate(post.getCreatedAt());
+        this.createDate = DateCalculatorUtil.formatDate(post.getCreatedAt());
         this.imageUrls = post.getImageUrls(); // Убедитесь, что это поле заполнено
     }
 }

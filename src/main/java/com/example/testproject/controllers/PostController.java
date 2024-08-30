@@ -1,8 +1,8 @@
 package com.example.testproject.controllers;
 
-import com.example.testproject.models.models.Post.PostWithCommentDTO;
-import com.example.testproject.models.models.Post.ShortPostDTO;
-import com.example.testproject.models.models.RequestDTO;
+import com.example.testproject.models.DTO.Post.PostWithCommentDTO;
+import com.example.testproject.models.DTO.Post.ShortPostDTO;
+import com.example.testproject.models.DTO.RequestDTO;
 import com.example.testproject.services.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

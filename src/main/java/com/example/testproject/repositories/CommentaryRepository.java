@@ -2,7 +2,6 @@ package com.example.testproject.repositories;
 
 import com.example.testproject.models.entities.Commentary;
 import com.example.testproject.models.entities.Post;
-import com.example.testproject.models.models.CommentaryDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

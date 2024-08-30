@@ -1,6 +1,6 @@
 package com.example.testproject.controllers;
 
-import com.example.testproject.models.models.RequestDTO;
+import com.example.testproject.models.DTO.RequestDTO;
 import com.example.testproject.services.RequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +21,11 @@ public class RequestController {
             @RequestPart("request") RequestDTO requestDTO,
             @RequestPart("files") List<MultipartFile> files) throws Exception {
         return requestService.createRequest(requestDTO, files);
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity Test(){
+        return ResponseEntity.ok("TEST");
     }
 
     @GetMapping("/request/{id}")

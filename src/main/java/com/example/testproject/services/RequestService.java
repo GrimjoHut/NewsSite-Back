@@ -1,7 +1,7 @@
 package com.example.testproject.services;
 
 import com.example.testproject.models.entities.Request;
-import com.example.testproject.models.models.RequestDTO;
+import com.example.testproject.models.DTO.RequestDTO;
 import com.example.testproject.repositories.RequestRepository;
 import com.example.testproject.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;

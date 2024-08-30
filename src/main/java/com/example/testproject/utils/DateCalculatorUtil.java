@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class DateCalculator {
+public class DateCalculatorUtil {
 
     public static String formatDate(LocalDateTime dateTime) {
         LocalDateTime now = LocalDateTime.now();
