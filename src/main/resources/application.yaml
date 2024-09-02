@@ -19,8 +19,19 @@ spring:
     properties:
       hibernate:
         enable_lazy_load_no_trans: true
-
   servlet:
     multipart:
       max-file-size: 10MB        # Максимальный размер загружаемого файла
       max-request-size: 10MB     # Максимальный размер всего запроса
+  spring:
+    mail:
+        host: smtp.yandex.ru
+        port: 587
+        username: zotov.bogdan2019@yandex.ru  # Замените на ваш Yandex username
+        password: trvajscjunkcsbdm             # Замените на ваш Yandex password
+        properties:
+          mail:
+            smtp:
+              auth: true
+              starttls:
+                enable: true

@@ -33,6 +33,10 @@ public class SecurityConfig {
             "/commentariesToPost/{id}",
             "/posts",
             "/post/{id}",
+            "/images",
+            "/send",
+            "/verify",
+            "/verify/**"
     };
 
     private static final String[] ADMIN_URLS = {
@@ -74,6 +78,7 @@ public class SecurityConfig {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers(EVERYBODY_URLS).permitAll();
                     auth.requestMatchers(WHITE_LIST_URL).permitAll();
                     auth.requestMatchers(MODER_URLS).hasRole("MODER");
                     auth.requestMatchers(ADMIN_URLS).hasRole("ADMIN");

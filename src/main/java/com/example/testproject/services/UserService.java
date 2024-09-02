@@ -8,6 +8,7 @@ import com.example.testproject.utils.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,6 +23,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final VerificationTokenService verificationTokenService;
+    private final EmailSenderService mailSender;
 
     public ResponseEntity<String> createUser(LoginDTO loginDTO) {
         if (userRepository.findByNickname(loginDTO.getNickname()).isPresent()) {
@@ -31,11 +34,18 @@ public class UserService {
         User user = new User();
         user.setNickname(loginDTO.getNickname());
         user.setPassword(passwordEncoder.encode(loginDTO.getPassword()));
-        user.setRoles(Collections.singletonList(RoleEnum.USER));
+        user.setEmail(loginDTO.getEmail());
+        String token = verificationTokenService.createVerificationToken(user);
+        mailSender.sendVerifyCode(user, token);
 
         userRepository.save(user);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
+        return ResponseEntity.status(HttpStatus.CREATED).body("Please check email and verify code");
+    }
+
+    public ResponseEntity<String> verifyUser(String token){
+        if (verificationTokenService.validateVerificationToken(token)) return ResponseEntity.status(HttpStatus.OK).body("Good");
+        else return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Token not found");
     }
 
     public ResponseEntity<?> login(LoginDTO loginDTO) {

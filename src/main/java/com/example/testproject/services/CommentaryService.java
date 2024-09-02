@@ -58,7 +58,7 @@ public class CommentaryService {
         return ResponseEntity.ok().build();
     }
 
-    public ResponseEntity deleteComment(Integer commentId, Integer userId) {
+    public ResponseEntity<String> deleteComment(Integer commentId, Integer userId) {
         Optional<Commentary> commentaryOpt = commentaryRepository.findById(commentId);
         if (commentaryOpt.isPresent()) {
             Commentary commentary = commentaryOpt.get();
@@ -76,12 +76,20 @@ public class CommentaryService {
         }
     }
 
-    public ResponseEntity changeComment(Integer id, String text){
+    public ResponseEntity<String> changeComment(Integer comment_id, Integer user_id, String text){
         LocalDateTime localDateTime = LocalDateTime.now();
-        Commentary commentary = commentaryRepository.findById(id).get();
-        commentary.setDescription(text);
-        commentary.setCreatedAt(localDateTime);
-        commentaryRepository.save(commentary);
-        return ResponseEntity.ok().build();
+        Optional<Commentary> tempCommentary = commentaryRepository.findById(comment_id);
+        Optional<User> tempUser = userRepository.findById(user_id);
+        if (tempCommentary.isPresent() && tempUser.isPresent()){
+            Commentary commentary = tempCommentary.get();
+            if (commentary.getUser().getId() == user_id) {
+                commentary.setDescription(text);
+                commentary.setCreatedAt(localDateTime);
+                commentaryRepository.save(commentary);
+                return ResponseEntity.status(HttpStatus.OK).body("All is good");
+            }
+            else return ResponseEntity.status(HttpStatus.FORBIDDEN).body("What the fuck are you doing here?");
+        }
+        else return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Comment or YOU don't exist");
     }
 }

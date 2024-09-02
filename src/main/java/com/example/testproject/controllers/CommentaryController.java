@@ -25,8 +25,8 @@ public class CommentaryController {
     }
 
     @PutMapping("/changeComment/{id}")
-    public ResponseEntity changeComment(@RequestParam String text, @RequestParam Integer id){
-        return commentaryService.changeComment(id, text);
+    public ResponseEntity changeComment(@RequestParam String text, @RequestParam Integer comment_id, @RequestParam Integer user_id){
+        return commentaryService.changeComment(comment_id, user_id, text);
     }
 
     @DeleteMapping("/deleteComment")

@@ -7,6 +7,12 @@ import io.minio.errors.MinioException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,11 +45,26 @@ public class ImageService {
                 GetPresignedObjectUrlArgs.builder()
                         .bucket(bucketName)
                         .object(fileName)
-                        .method(Method.POST) // Specify the HTTP method
-                        .expiry(60 * 60 * 24) // 24 hours
+                        .method(Method.GET) // Используйте GET для доступа к изображению
+                        .expiry(60 * 60 * 24) // 24 часа
                         .build()
         );
     }
 
+    public Resource loadImageAsResource(String imageUrl) {
+        try {
+            UrlResource resource = new UrlResource(imageUrl);
+            if (resource.exists() && resource.isReadable()) {
+                return resource;
+            } else {
+                throw new RuntimeException("Could not read the file from URL!");
+            }
+        } catch (MalformedURLException e) {
+            System.out.println("URL is malformed: " + e.getMessage());
+            throw new RuntimeException("URL is malformed: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error loading resource: " + e.getMessage());
+            throw new RuntimeException("Error loading resource: " + e.getMessage());
+        }
+    }
 }
-
