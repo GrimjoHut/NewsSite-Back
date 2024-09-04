@@ -9,9 +9,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 @Repository
-public interface CommentaryRepository extends JpaRepository<Commentary, Integer> {
+public interface CommentaryRepository extends JpaRepository<Commentary, Long> {
 
-    Commentary findTopByPostOrderByCreatedAtDesc(Post post);
-
-    List<Commentary> findByPostOrderByCreatedAtDesc(Pageable pageable, Post post);
+    List<Commentary> findByPostOrderByCreatedDateDesc(Pageable pageable, Post post);
 }

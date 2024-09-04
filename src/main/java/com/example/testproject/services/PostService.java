@@ -1,16 +1,12 @@
 package com.example.testproject.services;
 
-import com.example.testproject.models.entities.Commentary;
+import com.example.testproject.models.models.Dto.PostDto;
 import com.example.testproject.models.entities.Post;
 import com.example.testproject.models.entities.User;
-import com.example.testproject.models.DTO.CommentaryDTO;
-import com.example.testproject.models.DTO.Post.ShortPostDTO;
-import com.example.testproject.models.DTO.Post.PostWithCommentDTO;
-import com.example.testproject.models.DTO.RequestDTO;
-import com.example.testproject.repositories.CommentaryRepository;
 import com.example.testproject.repositories.PostRepository;
 import com.example.testproject.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -20,8 +16,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,98 +27,40 @@ import java.util.stream.Collectors;
 public class PostService {
 
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
-    private final CommentaryRepository commentaryRepository;
+    private final UserService userService;
 
-    public ResponseEntity<List<PostWithCommentDTO>> getFivePosts(int offsetMultiplier) {
-        int pageSize = 5;
-
-        Pageable pageable = PageRequest.of(offsetMultiplier, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
-
-        List<Post> posts = postRepository.findAllByOrderByCreatedAtDesc(pageable);
-
-        List<PostWithCommentDTO> postDTOList = posts.stream()
-                .map(post -> {
-                    Commentary latestComment = commentaryRepository.findTopByPostOrderByCreatedAtDesc(post);
-                    CommentaryDTO commentaryDTO = latestComment != null ? new CommentaryDTO(latestComment) : null;
-                    return new PostWithCommentDTO(post, commentaryDTO);
-                })
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(postDTOList);
+    public Post findById(Long id){
+        return postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
     }
 
 
-    public ResponseEntity getPost(int id){
-        return ResponseEntity.status(HttpStatus.OK).body(new ShortPostDTO(postRepository.findById(id)));
-    }
-
-    public ResponseEntity<?> createPost(RequestDTO requestDTO) {
-        LocalDateTime localDateTime = LocalDateTime.now();
-        Post post = new Post();
-        post.setHeader(requestDTO.getHeader());
-        post.setDescription(requestDTO.getDescription());
-        post.setUser(userRepository.findById(requestDTO.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("User not found")));
-        post.setCreatedAt(localDateTime);
-
-        // Инициализация новой коллекции изображений
-        List<String> imageUrls = new ArrayList<>();
-        if (requestDTO.getImageUrls() != null) {
-            imageUrls.addAll(requestDTO.getImageUrls());
-        }
-        post.setImageUrls(imageUrls);
-
-        postRepository.save(post);
-        return ResponseEntity.ok().build();
+    public Page<Post> getFivePosts(Pageable pageable) {
+        Page<Post> posts = postRepository.findAllByOrderByCreatedDateDesc(pageable);
+       return posts;
     }
 
 
+//    public ResponseEntity<Post> getPost(Long id){
+//        return this.findById(id);
+//    }
 
-    public ResponseEntity deletePost(Integer id){
-        postRepository.deleteById(id);
-        return ResponseEntity.ok().build();
-    }
+//    public void createPost(PostDto postDto) {
+//        Post post = new Post();
+//        post.setUser(userService.findByNickName(postDto.getAuthor().getNickname()));
+//        post.setHeader(postDto.getHeader());
+//        post.setDescription(postDto.getDescription());
+//        post.setCreatedDate(OffsetDateTime.now());
+//        List<String> imageUrls = new ArrayList<>();
+//        if (postDto.getImages() != null) {
+//            imageUrls.addAll(postDto.getImages().);
+//        }
+//        post.setImages(imageUrls);
+//        postRepository.save(post);
+//    }
 
-    public ResponseEntity<?> likePost(Integer userId, Integer postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
-        if (post.getLikes().contains(user)) {
-            post.getLikes().remove(user);
-            postRepository.save(post);
-            return ResponseEntity.ok("Like removed");
-        }
 
-        if (post.getDislikes().contains(user)) {
-            post.getDislikes().remove(user);
-        }
-
-        post.getLikes().add(user);
-        postRepository.save(post);
-        return ResponseEntity.ok("Like added");
-    }
-
-    public ResponseEntity<?> dislikePost(Integer userId, Integer postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
-
-        if (post.getDislikes().contains(user)) {
-            post.getDislikes().remove(user);
-            postRepository.save(post);
-            return ResponseEntity.ok("Dislike removed");
-        }
-
-        if (post.getLikes().contains(user)) {
-            post.getLikes().remove(user);
-        }
-
-        post.getDislikes().add(user);
-        postRepository.save(post);
-        return ResponseEntity.ok("Dislike added");
-    }
+//    public void deletePost(Long id){
+//
+//    }
 }

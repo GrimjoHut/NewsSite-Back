@@ -1,12 +1,17 @@
 package com.example.testproject.controllers;
 
-import com.example.testproject.models.DTO.Post.PostWithCommentDTO;
-import com.example.testproject.models.DTO.Post.ShortPostDTO;
-import com.example.testproject.models.DTO.RequestDTO;
+import com.example.testproject.models.entities.Post;
+import com.example.testproject.models.models.Dto.PostDto;
 import com.example.testproject.services.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -17,32 +22,34 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping("/posts")
-    public ResponseEntity<List<PostWithCommentDTO>> getPosts(@RequestParam Integer offset) {
-        return postService.getFivePosts(offset);
+    public ResponseEntity<Page<PostDto>> getPosts(@PageableDefault Pageable pageable) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(postService
+                        .getFivePosts(pageable)
+                        .map(PostDto::mapFromEntitySimplified));
     }
 
-    @GetMapping("/post/{id}")
-    public ResponseEntity<ShortPostDTO> getPost(@PathVariable Integer id) {
-        return postService.getPost(id);
+    @GetMapping("/post")
+    public ResponseEntity<?> getPost(@RequestParam Long id) {
+        Post post = postService.findById(id);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(PostDto.mapFromEntity(post));
     }
 
-    @PostMapping("/new_post")
-    public ResponseEntity<?> createPost(@RequestBody RequestDTO requestDTO) {
-        return postService.createPost(requestDTO);
-    }
 
-    @DeleteMapping("/delete_post")
-    public ResponseEntity<?> deletePost(@RequestParam Integer id) {
-        return postService.deletePost(id);
-    }
 
-    @PutMapping("/like_post")
-    public ResponseEntity<?> likePost(@RequestParam Integer userId, @RequestParam Integer postId) {
-        return postService.likePost(userId, postId);
-    }
+//    @PostMapping(value = "/newRequest", consumes = {"multipart/form-data"})
+//    public ResponseEntity createRequest(
+//            @RequestPart("request") PostDto requestDTO,
+//            @RequestPart("files") List<MultipartFile> files,
+//            @AuthenticationPrincipal ) throws Exception {
+//        return postService.createPost(postDto);
+//    }
 
-    @PutMapping("/dislike_post")
-    public ResponseEntity<?> dislikePost(@RequestParam Integer userId, @RequestParam Integer postId) {
-        return postService.dislikePost(userId, postId);
-    }
+//    @DeleteMapping("/post")
+//    public ResponseEntity<?> deletePost(@RequestParam Integer id) {
+//        return postService.deletePost(id);
+//    }
 }

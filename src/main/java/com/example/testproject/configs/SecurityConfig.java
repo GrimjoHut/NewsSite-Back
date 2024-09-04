@@ -78,12 +78,8 @@ public class SecurityConfig {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers(EVERYBODY_URLS).permitAll();
                     auth.requestMatchers(WHITE_LIST_URL).permitAll();
-                    auth.requestMatchers(MODER_URLS).hasRole("MODER");
-                    auth.requestMatchers(ADMIN_URLS).hasRole("ADMIN");
-                    auth.requestMatchers(USER_URLS).hasRole("USER");
-                    auth.anyRequest().authenticated();
+                    auth.anyRequest().permitAll();
                 })
                 .addFilterBefore(new JWTAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .build();

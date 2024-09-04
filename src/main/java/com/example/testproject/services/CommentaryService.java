@@ -2,7 +2,7 @@ package com.example.testproject.services;
 
 import com.example.testproject.models.entities.Commentary;
 import com.example.testproject.models.entities.Post;
-import com.example.testproject.models.DTO.CommentaryDTO;
+import com.example.testproject.models.models.Dto.CommentaryDto;
 import com.example.testproject.models.entities.User;
 import com.example.testproject.models.enums.RoleEnum;
 import com.example.testproject.repositories.CommentaryRepository;
@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,71 +26,58 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class CommentaryService {
+
     private final CommentaryRepository commentaryRepository;
-    private final PostRepository postRepository;
-    private final UserRepository userRepository;
+    private final PostService postService;
+    private final UserService userService;
 
-    public ResponseEntity<List<CommentaryDTO>> getTenCommentaryToPost(Integer id, Integer offset){
-
-        int pageSize = 10;
-
-        Post post = postRepository.findById(id).get();
-
-        Pageable pageable = PageRequest.of(offset, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
-
-        List<CommentaryDTO> CommentaryDTOList = commentaryRepository
-                .findByPostOrderByCreatedAtDesc(pageable, post)
-                .stream()
-                .map(CommentaryDTO::new)
-                .collect(Collectors
-                        .toList());
-
-        return ResponseEntity.status(HttpStatus.OK).body(CommentaryDTOList);
+    public Commentary findById(Long id) {
+        return commentaryRepository.findById(id).orElseThrow(() -> new RuntimeException("Comment not fouynd"));
     }
 
-    public ResponseEntity createComment(CommentaryDTO commentaryDTO, Integer user_id, Integer post_id){
-        LocalDateTime localDateTime = LocalDateTime.now();
+//    public ResponseEntity<List<CommentaryDto>> getTenCommentaryToPost(Long id, Integer offset) {
+//
+//        int pageSize = 10;
+//
+//        Post post = postService.findById(id);
+//
+//        Pageable pageable = PageRequest.of(offset, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+//
+//        List<CommentaryDto> CommentaryDTOList = commentaryRepository
+//                .findByPostOrderByCreatedDateDesc(pageable, post)
+//                .stream()
+//                .map(CommentaryDto::new)
+//                .collect(Collectors
+//                        .toList());
+//
+//        return ResponseEntity.status(HttpStatus.OK).body(CommentaryDTOList);
+//    }
+
+    public void createComment(CommentaryDto commentaryDTO, Long user_id, Long post_id) {
         Commentary commentary = new Commentary();
-        commentary.setCreatedAt(localDateTime);
-        commentary.setPost(postRepository.findById(post_id).get());
-        commentary.setDescription(commentaryDTO.getText());
-        commentary.setUser(userRepository.findById(user_id).get());
+        commentary.setCreatedDate(OffsetDateTime.now());
+        commentary.setPost(postService.findById(post_id));
+        commentary.setDescription(commentaryDTO.getDescription());
+        commentary.setUser(userService.findById(user_id));
         commentaryRepository.save(commentary);
-        return ResponseEntity.ok().build();
     }
 
-    public ResponseEntity<String> deleteComment(Integer commentId, Integer userId) {
-        Optional<Commentary> commentaryOpt = commentaryRepository.findById(commentId);
-        if (commentaryOpt.isPresent()) {
-            Commentary commentary = commentaryOpt.get();
-            User user = userRepository.findById(userId).get();
-
-            // Проверяем, является ли пользователь владельцем комментария или модератором
-            if (commentary.getUser().getId().equals(userId) || user.getRoles().contains(RoleEnum.MODER)) {
-                commentaryRepository.deleteById(commentId);
-                return ResponseEntity.ok().build();
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You don't have permission to delete this comment");
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Comment not found");
-        }
+    public void deleteComment(Long commentId, Long userId) {
+        Commentary commentary = this.findById(commentId);
+        User user = userService.findById(userId);
+        if (commentary.getUser().getId().equals(userId) || user.getRoles().contains(RoleEnum.MODER)) {
+            commentaryRepository.deleteById(commentId);
+        } else throw new RuntimeException("Permission denied");
     }
 
-    public ResponseEntity<String> changeComment(Integer comment_id, Integer user_id, String text){
+    public void changeComment(Long comment_id, Long user_id, String text) {
         LocalDateTime localDateTime = LocalDateTime.now();
-        Optional<Commentary> tempCommentary = commentaryRepository.findById(comment_id);
-        Optional<User> tempUser = userRepository.findById(user_id);
-        if (tempCommentary.isPresent() && tempUser.isPresent()){
-            Commentary commentary = tempCommentary.get();
-            if (commentary.getUser().getId() == user_id) {
-                commentary.setDescription(text);
-                commentary.setCreatedAt(localDateTime);
-                commentaryRepository.save(commentary);
-                return ResponseEntity.status(HttpStatus.OK).body("All is good");
-            }
-            else return ResponseEntity.status(HttpStatus.FORBIDDEN).body("What the fuck are you doing here?");
-        }
-        else return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Comment or YOU don't exist");
+        Commentary commentary = this.findById(comment_id);
+        User user = userService.findById(user_id);
+        if (commentary.getUser().getId() == user_id) {
+            commentary.setDescription(text);
+            commentary.setCreatedDate(OffsetDateTime.now());
+            commentaryRepository.save(commentary);
+        } else throw new RuntimeException("Permission denied");
     }
 }

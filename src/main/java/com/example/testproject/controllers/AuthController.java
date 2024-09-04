@@ -1,13 +1,10 @@
 package com.example.testproject.controllers;
 
-import com.example.testproject.models.DTO.LoginDTO;
+import com.example.testproject.models.models.Dto.LoginDto;
 import com.example.testproject.services.UserService;
-import com.example.testproject.services.VerificationTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.example.testproject.security.JWTResponse;
-import org.springframework.web.servlet.ModelAndView;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,12 +13,12 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/registration")
-    public ResponseEntity<String> createNewUser(@RequestBody LoginDTO loginDTO){
+    public ResponseEntity<String> createNewUser(@RequestBody LoginDto loginDTO){
         return userService.createUser(loginDTO);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO){
+    public ResponseEntity<?> login(@RequestBody LoginDto loginDTO){
         return userService.login(loginDTO);
     }
 

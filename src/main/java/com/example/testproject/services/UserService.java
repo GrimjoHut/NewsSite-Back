@@ -1,6 +1,6 @@
 package com.example.testproject.services;
 
-import com.example.testproject.models.DTO.LoginDTO;
+import com.example.testproject.models.models.Dto.LoginDto;
 import com.example.testproject.models.entities.User;
 import com.example.testproject.models.enums.RoleEnum;
 import com.example.testproject.repositories.UserRepository;
@@ -8,13 +8,10 @@ import com.example.testproject.utils.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 import com.example.testproject.security.JWTResponse;
 
-import java.util.Collections;
 import java.util.Optional;
 
 @Service
@@ -26,7 +23,16 @@ public class UserService {
     private final VerificationTokenService verificationTokenService;
     private final EmailSenderService mailSender;
 
-    public ResponseEntity<String> createUser(LoginDTO loginDTO) {
+    public User findById(Long id){
+        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    public User findByNickName(String nickname){
+        return userRepository.findByNickname(nickname)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    public ResponseEntity<String> createUser(LoginDto loginDTO) {
         if (userRepository.findByNickname(loginDTO.getNickname()).isPresent()) {
             return ResponseEntity.status(HttpStatus.FOUND).body("User already exists");
         }
@@ -48,7 +54,7 @@ public class UserService {
         else return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Token not found");
     }
 
-    public ResponseEntity<?> login(LoginDTO loginDTO) {
+    public ResponseEntity<?> login(LoginDto loginDTO) {
         Optional<User> tempUser = userRepository.findByNickname(loginDTO.getNickname());
 
         if (tempUser.isPresent()) {

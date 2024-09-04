@@ -1,9 +1,9 @@
-package com.example.testproject.models.DTO;
+package com.example.testproject.models.models.Dto;
 
 import lombok.Data;
 
 @Data
-public class LoginDTO {
+public class LoginDto {
     private String nickname;
     private String password;
     private String email;

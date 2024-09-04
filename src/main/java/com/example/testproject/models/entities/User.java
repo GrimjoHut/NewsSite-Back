@@ -6,8 +6,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.checkerframework.checker.units.qual.C;
 
+import javax.management.relation.Role;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -17,7 +20,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
     @Column(name = "nickname", unique = true)
     private String nickname;
@@ -31,22 +34,15 @@ public class User {
     @Column(name = "enabled", nullable = false)
     private boolean enabled = false; // Значение по умолчанию
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Enumerated(EnumType.STRING)
     @Column(name = "role")
-    private List<RoleEnum> roles = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
-    private List<Request> requests = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
-    private List<Commentary> commentaries = new ArrayList<>();
+    private Set<RoleEnum> roles = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "likes")
-    private List<Post> likedPosts = new ArrayList<>();
-
-    @ManyToMany(mappedBy = "dislikes")
-    private List<Post> dislikedPosts = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
+    private List<Likes> likes = new ArrayList<>();
 }

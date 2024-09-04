@@ -1,6 +1,6 @@
 package com.example.testproject.controllers;
 
-import com.example.testproject.models.DTO.CommentaryDTO;
+import com.example.testproject.models.models.Dto.CommentaryDto;
 import com.example.testproject.services.CommentaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,23 +14,30 @@ public class CommentaryController {
 
     private final CommentaryService commentaryService;
 
-    @GetMapping("/commentariesToPost/{id}")
-    public ResponseEntity<List<CommentaryDTO>> getAllComments(@PathVariable Integer id, @RequestParam Integer offset){
-        return commentaryService.getTenCommentaryToPost(id, offset);
-    }
+//    @GetMapping("/commentariesToPost/{id}")
+//    public ResponseEntity<List<CommentaryDto>> getAllComments(@PathVariable Long id,
+//                                                              @RequestParam Integer offset){
+//        return commentaryService.getTenCommentaryToPost(id, offset);
+//    }
 
     @PostMapping("/createComment")
-    public ResponseEntity createComment(@RequestBody CommentaryDTO commentaryDTO, @RequestParam Integer post_id, @RequestParam Integer user_id){
-        return commentaryService.createComment(commentaryDTO, user_id, post_id);
+    public ResponseEntity<String> createComment(@RequestBody CommentaryDto commentaryDTO,
+                                        @RequestParam Long post_id,
+                                        @RequestParam Long user_id){
+        commentaryService.createComment(commentaryDTO, user_id, post_id);
+        return ResponseEntity.ok("Comment created");
     }
-
     @PutMapping("/changeComment/{id}")
-    public ResponseEntity changeComment(@RequestParam String text, @RequestParam Integer comment_id, @RequestParam Integer user_id){
-        return commentaryService.changeComment(comment_id, user_id, text);
+    public ResponseEntity<String> changeComment(@RequestParam String text,
+                                        @RequestParam Long comment_id,
+                                        @RequestParam Long user_id){
+        commentaryService.changeComment(comment_id, user_id, text);
+        return ResponseEntity.ok("Comment changed");
     }
 
     @DeleteMapping("/deleteComment")
-    public ResponseEntity deleteComment(@RequestParam Integer id, @RequestParam Integer userId){
-        return commentaryService.deleteComment(id, userId);
+    public ResponseEntity deleteComment(@RequestParam Long postId, @RequestParam Long userId){
+        commentaryService.deleteComment(postId, userId);
+        return ResponseEntity.ok("Commentary deleted");
     }
 }

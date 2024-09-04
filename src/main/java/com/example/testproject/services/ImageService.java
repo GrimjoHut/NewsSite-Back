@@ -50,21 +50,4 @@ public class ImageService {
                         .build()
         );
     }
-
-    public Resource loadImageAsResource(String imageUrl) {
-        try {
-            UrlResource resource = new UrlResource(imageUrl);
-            if (resource.exists() && resource.isReadable()) {
-                return resource;
-            } else {
-                throw new RuntimeException("Could not read the file from URL!");
-            }
-        } catch (MalformedURLException e) {
-            System.out.println("URL is malformed: " + e.getMessage());
-            throw new RuntimeException("URL is malformed: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("Error loading resource: " + e.getMessage());
-            throw new RuntimeException("Error loading resource: " + e.getMessage());
-        }
-    }
 }
