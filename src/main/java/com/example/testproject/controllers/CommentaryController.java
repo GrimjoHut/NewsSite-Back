@@ -1,8 +1,13 @@
 package com.example.testproject.controllers;
 
+import com.example.testproject.models.entities.Commentary;
 import com.example.testproject.models.models.Dto.CommentaryDto;
 import com.example.testproject.services.CommentaryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,11 +19,15 @@ public class CommentaryController {
 
     private final CommentaryService commentaryService;
 
-//    @GetMapping("/commentariesToPost/{id}")
-//    public ResponseEntity<List<CommentaryDto>> getAllComments(@PathVariable Long id,
-//                                                              @RequestParam Integer offset){
-//        return commentaryService.getTenCommentaryToPost(id, offset);
-//    }
+    @GetMapping("/commentariesToPost/{id}")
+    public ResponseEntity<Page<CommentaryDto>> getTenComments(@PageableDefault Pageable pageable,
+                                                              @RequestParam Long post_id){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(commentaryService
+                        .getTenCommentaties(pageable, post_id)
+                        .map(CommentaryDto::mapFromEntity));
+    }
 
     @PostMapping("/createComment")
     public ResponseEntity<String> createComment(@RequestBody CommentaryDto commentaryDTO,

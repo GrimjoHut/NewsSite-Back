@@ -15,7 +15,7 @@ public class File {
     @Id
     @UuidGenerator
     @Column(name = "id", nullable = false, updatable = false)
-    private UUID id;
+    private Long id;
 
     private String bucket;
     private String name;

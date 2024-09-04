@@ -9,7 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,16 +39,17 @@ public class PostController {
 
 
 
-//    @PostMapping(value = "/newRequest", consumes = {"multipart/form-data"})
-//    public ResponseEntity createRequest(
-//            @RequestPart("request") PostDto requestDTO,
-//            @RequestPart("files") List<MultipartFile> files,
-//            @AuthenticationPrincipal ) throws Exception {
-//        return postService.createPost(postDto);
-//    }
+    @PostMapping(value = "/newRequest", consumes = {"multipart/form-data"})
+    public ResponseEntity<String> createRequest(
+            @RequestPart("request") PostDto postDto,
+            @RequestPart("files") List<MultipartFile> files){
+        postService.createPost(postDto, files);
+        return ResponseEntity.ok("Post created");
+    }
 
-//    @DeleteMapping("/post")
-//    public ResponseEntity<?> deletePost(@RequestParam Integer id) {
-//        return postService.deletePost(id);
-//    }
+    @DeleteMapping("/post")
+    public ResponseEntity<?> deletePost(@RequestParam Long id) {
+        postService.deletePost(id);
+        return ResponseEntity.ok("Post deleted");
+    }
 }

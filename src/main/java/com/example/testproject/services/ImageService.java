@@ -1,9 +1,14 @@
 package com.example.testproject.services;
+import com.example.testproject.models.entities.File;
+import com.example.testproject.models.entities.Image;
+import com.example.testproject.models.entities.Post;
+import com.example.testproject.repositories.ImageRepository;
 import io.minio.http.Method;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.errors.MinioException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,12 +23,14 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @Service
+@RequiredArgsConstructor
 public class ImageService {
 
-    @Autowired
-    private MinioClient minioClient;
+    private final MinioClient minioClient;
+    private final FileService fileService;
+    private final ImageRepository imageRepository;
 
-    public String uploadImage(MultipartFile file, String bucketName) throws Exception {
+    public Image uploadImage(MultipartFile file, String bucketName) throws Exception {
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
         try (InputStream inputStream = file.getInputStream()) {
@@ -35,19 +42,16 @@ public class ImageService {
                             .contentType(file.getContentType())
                             .build()
             );
-        } catch (MinioException e) {
-            throw new Exception("Error uploading file to MinIO: " + e.getMessage(), e);
-        } catch (IOException e) {
-            throw new Exception("Error reading the file: " + e.getMessage(), e);
+        } catch (MinioException | IOException e) {
+            throw new Exception("Ошибка загрузки файла в MinIO: " + e.getMessage(), e);
         }
 
-        return minioClient.getPresignedObjectUrl(
-                GetPresignedObjectUrlArgs.builder()
-                        .bucket(bucketName)
-                        .object(fileName)
-                        .method(Method.GET) // Используйте GET для доступа к изображению
-                        .expiry(60 * 60 * 24) // 24 часа
-                        .build()
-        );
+        // Создаем и сохраняем сущность файла
+        File savedFile = fileService.createFile(fileName, bucketName, file);
+
+        // Создаем и сохраняем сущность изображения
+        Image image = new Image();
+        image.setFile(savedFile);
+        return imageRepository.save(image);  // Возвращаем сохраненное изображение
     }
 }

@@ -9,6 +9,7 @@ import com.example.testproject.repositories.CommentaryRepository;
 import com.example.testproject.repositories.PostRepository;
 import com.example.testproject.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -35,23 +36,12 @@ public class CommentaryService {
         return commentaryRepository.findById(id).orElseThrow(() -> new RuntimeException("Comment not fouynd"));
     }
 
-//    public ResponseEntity<List<CommentaryDto>> getTenCommentaryToPost(Long id, Integer offset) {
-//
-//        int pageSize = 10;
-//
-//        Post post = postService.findById(id);
-//
-//        Pageable pageable = PageRequest.of(offset, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
-//
-//        List<CommentaryDto> CommentaryDTOList = commentaryRepository
-//                .findByPostOrderByCreatedDateDesc(pageable, post)
-//                .stream()
-//                .map(CommentaryDto::new)
-//                .collect(Collectors
-//                        .toList());
-//
-//        return ResponseEntity.status(HttpStatus.OK).body(CommentaryDTOList);
-//    }
+    public Page<Commentary> getTenCommentaties(Pageable pageable, Long post_id) {
+        Post post = postService.findById(post_id);
+        Page<Commentary> commentaries = commentaryRepository
+                .findByPostOrderByCreatedDateDesc(pageable, post);
+        return commentaries;
+    }
 
     public void createComment(CommentaryDto commentaryDTO, Long user_id, Long post_id) {
         Commentary commentary = new Commentary();
