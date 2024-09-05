@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +30,7 @@ public class CommentaryController {
                         .map(CommentaryDto::mapFromEntity));
     }
 
+    @Secured("ROLE_USER")
     @PostMapping("/createComment")
     public ResponseEntity<String> createComment(@RequestBody CommentaryDto commentaryDTO,
                                         @RequestParam Long post_id,
@@ -36,6 +38,8 @@ public class CommentaryController {
         commentaryService.createComment(commentaryDTO, user_id, post_id);
         return ResponseEntity.ok("Comment created");
     }
+
+    @Secured("ROLE_USER")
     @PutMapping("/changeComment/{id}")
     public ResponseEntity<String> changeComment(@RequestParam String text,
                                         @RequestParam Long comment_id,
@@ -44,6 +48,7 @@ public class CommentaryController {
         return ResponseEntity.ok("Comment changed");
     }
 
+    @Secured("ROLE_USER")
     @DeleteMapping("/deleteComment")
     public ResponseEntity deleteComment(@RequestParam Long postId, @RequestParam Long userId){
         commentaryService.deleteComment(postId, userId);

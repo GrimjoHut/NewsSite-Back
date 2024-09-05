@@ -27,41 +27,6 @@ public class SecurityConfig {
             "/webjars/**",
     };
 
-    private static final String[] EVERYBODY_URLS = {
-            "/login",
-            "/registration",
-            "/commentariesToPost/{id}",
-            "/posts",
-            "/post/{id}",
-            "/images",
-            "/send",
-            "/verify",
-            "/verify/**"
-    };
-
-    private static final String[] ADMIN_URLS = {
-            "/giveRole",
-            "/takeRole"
-    };
-
-    private static final String[] USER_URLS = {
-            "/createComment",
-            "/changeComment/{id}",
-            "/deleteComment",
-            "/delete_post",
-            "/like_post",
-            "/dislike_post",
-            "/newRequest",
-    };
-
-    private static final String[] MODER_URLS = {
-            "/new_post",
-            "/accept_request/{id}",
-            "/reject_request/{id}",
-            "/request/{id}",
-            "/requests",
-    };
-
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity httpSecurity) throws Exception {

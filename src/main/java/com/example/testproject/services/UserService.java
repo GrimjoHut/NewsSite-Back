@@ -27,7 +27,7 @@ public class UserService {
         return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    public User findByNickName(String nickname){
+    public User findByNickname(String nickname){
         return userRepository.findByNickname(nickname)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }

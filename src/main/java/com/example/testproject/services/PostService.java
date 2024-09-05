@@ -1,6 +1,8 @@
 package com.example.testproject.services;
 
+import com.example.testproject.Security.CustomUserDetails;
 import com.example.testproject.models.entities.Image;
+import com.example.testproject.models.enums.StatusEnum;
 import com.example.testproject.models.models.Dto.PostDto;
 import com.example.testproject.models.entities.Post;
 import com.example.testproject.models.entities.User;
@@ -42,31 +44,33 @@ public class PostService {
        return posts;
     }
 
-        public void createPost(PostDto postDto, List<MultipartFile> files) {
+        public void createPost(PostDto postDto, List<MultipartFile> files, CustomUserDetails userDetails) {
             Post post = new Post();
-            post.setUser(userService.findByNickName(postDto.getAuthor().getNickname()));
+            post.setUser(userService.findByNickname(postDto.getAuthor().getNickname()));
             post.setHeader(postDto.getHeader());
             post.setDescription(postDto.getDescription());
             post.setCreatedDate(OffsetDateTime.now());
 
                         postRepository.save(post);
 
-            // Загружаем изображения и связываем их с постом
             for (MultipartFile file : files) {
                 try {
                     Image image = imageService.uploadImage(file, "image-bucket");
 
-                    // Связываем изображение с постом
                     image.setPost(post);
 
-                    // Сохраняем измененное изображение с привязкой к посту
                     post.getImages().add(image);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
 
-            // Сохраняем пост с привязанными изображениями
+            if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+                post.setStatus(StatusEnum.PUBLISHED); // Логика для администратора
+            } else {
+                post.setStatus(StatusEnum.REQUESTED); // Логика для обычного пользователя
+            }
+
             postRepository.save(post);
         }
     public void deletePost(Long id){

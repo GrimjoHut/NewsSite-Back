@@ -31,8 +31,12 @@ public class User {
     @Column(name = "email")
     private String email;
 
+    @Column(name = "avatar")
+    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
+    private Image avatar;
+
     @Column(name = "enabled", nullable = false)
-    private boolean enabled = false; // Значение по умолчанию
+    private boolean enabled = false;
 
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))

@@ -24,7 +24,7 @@ public class Post {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private StatusEnum status;
-    @Basic
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdDate;
 

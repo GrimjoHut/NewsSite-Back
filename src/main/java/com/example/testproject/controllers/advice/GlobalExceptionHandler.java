@@ -1,6 +1,10 @@
 package com.example.testproject.controllers.advice;
 
 import com.example.testproject.exceptions.AppError;
+import com.example.testproject.exceptions.GlobalAppException;
+import com.example.testproject.exceptions.custom.CommentaryNotFoundException;
+import com.example.testproject.exceptions.custom.PostNotFoundException;
+import com.example.testproject.exceptions.custom.UserNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -18,9 +22,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import java.util.stream.Collectors;
 
-/**
- * @author Vladimir Krasnov
- */
+
 @RestControllerAdvice
 @RequiredArgsConstructor
 @Slf4j
@@ -37,6 +39,20 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new AppError(400, exception.getMessage()));
     }
+
+    @ExceptionHandler({
+            UserNotFoundException.class,
+            PostNotFoundException.class,
+            CommentaryNotFoundException.class
+
+    })
+    public ResponseEntity<AppError> onFindingExceptions(RuntimeException ex){
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new AppError(404, ex.getMessage()));
+    }
+
+
 
     @ExceptionHandler({
             MethodArgumentNotValidException.class

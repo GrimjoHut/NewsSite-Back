@@ -10,10 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 @RestController
 @RequiredArgsConstructor
 public class LikesController {
@@ -27,11 +23,13 @@ public class LikesController {
         return ResponseEntity.ok().body(likesService.likesPost(postId, commId));
     }
 
-//    @PostMapping("/likePost")
-//    public ResponseEntity likePost(@RequestParam UUID postId,
-//                                   @RequestParam UUID commentId,
-//                                   @RequestParam LikesEnum reaction){
-//        likesService.
-//    }
+    @PostMapping("/likePost")
+    public ResponseEntity<String> like(@RequestParam(required = false) Long postId,
+                                       @RequestParam(required = false) Long commentId,
+                                       @RequestParam LikesEnum reaction,
+                                       @RequestParam Long userId) {
+        likesService.like(postId, commentId, reaction, userId);
+        return ResponseEntity.ok("Like/dislike recorded successfully");
+    }
 
 }
