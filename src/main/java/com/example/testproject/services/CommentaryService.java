@@ -1,5 +1,7 @@
 package com.example.testproject.services;
 
+import com.example.testproject.exceptions.custom.CommentaryNotFoundException;
+import com.example.testproject.exceptions.custom.PermissionNotAllowed;
 import com.example.testproject.models.entities.Commentary;
 import com.example.testproject.models.entities.Post;
 import com.example.testproject.models.models.Dto.CommentaryDto;
@@ -33,7 +35,7 @@ public class CommentaryService {
     private final UserService userService;
 
     public Commentary findById(Long id) {
-        return commentaryRepository.findById(id).orElseThrow(() -> new RuntimeException("Comment not fouynd"));
+        return commentaryRepository.findById(id).orElseThrow(CommentaryNotFoundException::new);
     }
 
     public Page<Commentary> getTenCommentaties(Pageable pageable, Long post_id) {
@@ -68,6 +70,6 @@ public class CommentaryService {
             commentary.setDescription(text);
             commentary.setCreatedDate(OffsetDateTime.now());
             commentaryRepository.save(commentary);
-        } else throw new RuntimeException("Permission denied");
+        } else throw new PermissionNotAllowed();
     }
 }

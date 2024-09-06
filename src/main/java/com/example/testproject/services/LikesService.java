@@ -1,5 +1,6 @@
 package com.example.testproject.services;
 
+import com.example.testproject.exceptions.custom.LikeSearchInvalidParametrs;
 import com.example.testproject.models.entities.Commentary;
 import com.example.testproject.models.entities.Likes;
 import com.example.testproject.models.entities.Post;
@@ -28,7 +29,7 @@ public class LikesService {
 
     public void like(Long postId, Long commId, LikesEnum reaction, Long userId) {
         if ((postId != null && commId != null) || (postId == null && commId == null))
-            throw new RuntimeException("Either postId or commentId should be provided");
+            throw new LikeSearchInvalidParametrs();
 
         User user = userService.findById(userId);
 

@@ -1,6 +1,7 @@
 package com.example.testproject.services;
 
 import com.example.testproject.Security.CustomUserDetails;
+import com.example.testproject.exceptions.custom.PostNotFoundException;
 import com.example.testproject.models.entities.Image;
 import com.example.testproject.models.enums.StatusEnum;
 import com.example.testproject.models.models.Dto.PostDto;
@@ -35,7 +36,7 @@ public class PostService {
     private final ImageService imageService;
 
     public Post findById(Long id){
-        return postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
+        return postRepository.findById(id).orElseThrow(PostNotFoundException::new);
     }
 
 
@@ -65,7 +66,7 @@ public class PostService {
                 }
             }
 
-            if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_MODER"))) {
                 post.setStatus(StatusEnum.PUBLISHED); // Логика для администратора
             } else {
                 post.setStatus(StatusEnum.REQUESTED); // Логика для обычного пользователя

@@ -14,14 +14,23 @@ import java.util.List;
 public class UserDto {
     private String nickname;
     private String email;
-    private List<RoleEnum> roles;
+    private ImageDto avatar;
+
 
     public static UserDtoBuilder basicMapping(User user){
         return UserDto.builder()
-                .nickname(user.getNickname());
+                .nickname(user.getNickname())
+                .avatar(ImageDto.mapFromEntity(user.getAvatar()));
     }
 
-    public static UserDto mapFromEntity(User user){
+    public static UserDto mapFromEntitySimplify (User user){
         return basicMapping(user).build();
+    }
+
+    public static UserDto mapFromEntity (User user){
+        return basicMapping(user)
+                .email(user.getEmail())
+                .avatar(ImageDto.mapFromEntity(user.getAvatar()))
+                .build();
     }
 }

@@ -1,5 +1,7 @@
 package com.example.testproject.services;
 
+import com.example.testproject.exceptions.custom.UserNotFoundException;
+import com.example.testproject.exceptions.custom.WrongAuthorizationParametrsRequest;
 import com.example.testproject.models.models.Dto.LoginDto;
 import com.example.testproject.models.entities.User;
 import com.example.testproject.models.enums.RoleEnum;
@@ -24,12 +26,12 @@ public class UserService {
     private final EmailSenderService mailSender;
 
     public User findById(Long id){
-        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
     }
 
     public User findByNickname(String nickname){
         return userRepository.findByNickname(nickname)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(UserNotFoundException::new);
     }
 
     public ResponseEntity<String> createUser(LoginDto loginDTO) {
@@ -54,22 +56,17 @@ public class UserService {
         else return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Token not found");
     }
 
-    public ResponseEntity<?> login(LoginDto loginDTO) {
-        Optional<User> tempUser = userRepository.findByNickname(loginDTO.getNickname());
-
-        if (tempUser.isPresent()) {
-            User user = tempUser.get();
-            if (passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
-                // Генерация нового токена при каждом успешном входе
-                String token = JWTUtil.generateToken(user.getNickname());
-                return ResponseEntity.ok(new JWTResponse(token));
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Wrong login or password");
-            }
+    public JWTResponse login(LoginDto loginDTO) {
+        User user = this.findByNickname(loginDTO.getNickname())
+        if (passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
+            // Генерация нового токена при каждом успешном входе
+            String token = JWTUtil.generateToken(user.getNickname());
+            return new JWTResponse(token);
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            throw new WrongAuthorizationParametrsRequest();
         }
     }
+
     public ResponseEntity<String> giveRole(String actingUserNickname, String targetUserNickname, RoleEnum role) {
         Optional<User> actingUserOpt = userRepository.findByNickname(actingUserNickname);
         Optional<User> targetUserOpt = userRepository.findByNickname(targetUserNickname);
