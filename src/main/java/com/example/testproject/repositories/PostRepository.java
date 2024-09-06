@@ -1,6 +1,7 @@
 package com.example.testproject.repositories;
 
 import com.example.testproject.models.entities.Post;
+import com.example.testproject.models.enums.StatusEnum;
 import com.example.testproject.models.models.Dto.PostDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,5 +14,7 @@ import java.util.Optional;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
-    Page<Post> findAllByOrderByCreatedDateDesc(Pageable pageable);
+    Page<Post> findByCommunityIdAndStatusOrderByCreatedDateDesc(Long communityId, StatusEnum status, Pageable pageable);
+
+    Page<Post> findByCommunityIdInAndStatusOrderByCreatedDateDesc(List<Long> communityIds, StatusEnum status, Pageable pageable);
 }

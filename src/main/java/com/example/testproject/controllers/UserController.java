@@ -1,16 +1,19 @@
 package com.example.testproject.controllers;
 
+import com.example.testproject.Security.CustomUserDetails;
 import com.example.testproject.models.enums.RoleEnum;
 import com.example.testproject.models.models.Dto.UserDto;
+import com.example.testproject.services.CustomUserDetailsService;
 import com.example.testproject.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,6 +28,16 @@ public class UserController {
                 .status(HttpStatus.OK)
                 .body(UserDto
                         .mapFromEntity(userService.findById(id)));
+    }
+
+    @Secured("ROLE_USER")
+    @PostMapping(value = "/newRequest", consumes = {"multipart/form-data"})
+    public ResponseEntity<String> changeAvatar(@RequestPart("files") MultipartFile file,
+                                               @AuthenticationPrincipal CustomUserDetails userDetails){
+        userService.changeAvatar(file, userDetails);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Avatar changed");
     }
 
     @Secured("ROLE_ADMIN")

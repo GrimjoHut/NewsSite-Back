@@ -29,7 +29,8 @@ public class PostDto {
     public static PostDto mapFromEntitySimplified(Post post){
         return basicMapping(post)
                 .createDate(post.getCreatedDate().format(Formatter.formatter))
-                .description(post.getDescription().length() < 400 ? post.getDescription() : post.getDescription().substring(0, 250) + "...")
+                .description(post.getDescription()
+                        .length() < 400 ? post.getDescription() : post.getDescription().substring(0, 250) + "...")
                 .build();
     }
 

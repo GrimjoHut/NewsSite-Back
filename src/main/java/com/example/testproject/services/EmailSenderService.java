@@ -1,7 +1,6 @@
 package com.example.testproject.services;
 
 import com.example.testproject.models.entities.User;
-import org.aspectj.bridge.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;

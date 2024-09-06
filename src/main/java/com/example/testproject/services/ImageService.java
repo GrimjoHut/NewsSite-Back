@@ -30,6 +30,7 @@ public class ImageService {
     private final FileService fileService;
     private final ImageRepository imageRepository;
 
+
     public Image uploadImage(MultipartFile file, String bucketName) throws Exception {
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
@@ -53,5 +54,9 @@ public class ImageService {
         Image image = new Image();
         image.setFile(savedFile);
         return imageRepository.save(image);  // Возвращаем сохраненное изображение
+    }
+
+    public void deleteImage(Image image){
+        imageRepository.delete(image);
     }
 }

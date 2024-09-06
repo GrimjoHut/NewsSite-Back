@@ -1,7 +1,10 @@
 package com.example.testproject.services;
 
+import com.example.testproject.Security.CustomUserDetails;
 import com.example.testproject.exceptions.custom.UserNotFoundException;
 import com.example.testproject.exceptions.custom.WrongAuthorizationParametrsRequest;
+import com.example.testproject.models.entities.File;
+import com.example.testproject.models.entities.Image;
 import com.example.testproject.models.models.Dto.LoginDto;
 import com.example.testproject.models.entities.User;
 import com.example.testproject.models.enums.RoleEnum;
@@ -13,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.example.testproject.security.JWTResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -23,10 +27,12 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final VerificationTokenService verificationTokenService;
+    private final ImageService imageService;
     private final EmailSenderService mailSender;
 
     public User findById(Long id){
-        return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        return userRepository.findById(id)
+                .orElseThrow(UserNotFoundException::new);
     }
 
     public User findByNickname(String nickname){
@@ -34,37 +40,43 @@ public class UserService {
                 .orElseThrow(UserNotFoundException::new);
     }
 
-    public ResponseEntity<String> createUser(LoginDto loginDTO) {
-        if (userRepository.findByNickname(loginDTO.getNickname()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.FOUND).body("User already exists");
-        }
-
+    public void createUser(LoginDto loginDTO) {
+        if (userRepository.findByNickname(loginDTO.getNickname()).isPresent())
+            throw new WrongAuthorizationParametrsRequest();
         User user = new User();
         user.setNickname(loginDTO.getNickname());
         user.setPassword(passwordEncoder.encode(loginDTO.getPassword()));
         user.setEmail(loginDTO.getEmail());
         String token = verificationTokenService.createVerificationToken(user);
         mailSender.sendVerifyCode(user, token);
-
         userRepository.save(user);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body("Please check email and verify code");
     }
 
-    public ResponseEntity<String> verifyUser(String token){
-        if (verificationTokenService.validateVerificationToken(token)) return ResponseEntity.status(HttpStatus.OK).body("Good");
-        else return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Token not found");
+    public void verifyUser(String token){
+        verificationTokenService.validateVerificationToken(token);
     }
 
     public JWTResponse login(LoginDto loginDTO) {
-        User user = this.findByNickname(loginDTO.getNickname())
+        User user = this.findByNickname(loginDTO.getNickname());
         if (passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
-            // Генерация нового токена при каждом успешном входе
             String token = JWTUtil.generateToken(user.getNickname());
             return new JWTResponse(token);
         } else {
             throw new WrongAuthorizationParametrsRequest();
         }
+    }
+
+    public void changeAvatar(MultipartFile file, CustomUserDetails userDetails){
+        User user = userDetails.getUser();
+        try {
+            Image image = imageService.uploadImage(file, "image-bucket");
+            image.setUser(user);
+            if (user.getAvatar() != null) imageService.deleteImage(user.getAvatar());
+            user.setAvatar(image);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        userRepository.save(user);
     }
 
     public ResponseEntity<String> giveRole(String actingUserNickname, String targetUserNickname, RoleEnum role) {
@@ -83,8 +95,8 @@ public class UserService {
                 return ResponseEntity.status(HttpStatus.OK).body("User already has this role");
             } else {
                 targetUser.getRoles().add(role);
-                if (role == RoleEnum.ADMIN && !targetUser.getRoles().contains(RoleEnum.MODER)) {
-                    targetUser.getRoles().add(RoleEnum.MODER);
+                if (role == RoleEnum.ROLE_ADMIN && !targetUser.getRoles().contains(RoleEnum.ROLE_MODER)) {
+                    targetUser.getRoles().add(RoleEnum.ROLE_MODER);
                 }
                 userRepository.save(targetUser);
                 return ResponseEntity.status(HttpStatus.OK).body("Role was given");
@@ -110,8 +122,8 @@ public class UserService {
                 return ResponseEntity.status(HttpStatus.OK).body("User doesn't have this role");
             } else {
                 targetUser.getRoles().remove(role);
-                if (role == RoleEnum.MODER && targetUser.getRoles().contains(RoleEnum.ADMIN)) {
-                    targetUser.getRoles().remove(RoleEnum.ADMIN);
+                if (role == RoleEnum.ROLE_MODER && targetUser.getRoles().contains(RoleEnum.ROLE_ADMIN)) {
+                    targetUser.getRoles().remove(RoleEnum.ROLE_ADMIN);
                 }
                 userRepository.save(targetUser);
                 return ResponseEntity.status(HttpStatus.OK).body("Role was taken");

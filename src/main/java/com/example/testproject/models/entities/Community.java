@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.management.relation.Role;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -26,9 +29,23 @@ public class Community {
     @OneToOne(mappedBy = "community", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
     private Image avatar;
 
-    @Column(name = "posts")
+    @Column
+    @OneToMany(mappedBy = "community", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
     private Set<Post> posts;
 
-    @Column(name = "subscribers")
+    @Column
+    @ManyToMany(mappedBy = "subscribes", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     private Set<User> subscribers;
+
+    @Column
+    @OneToMany(mappedBy = "community", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
+    private List<RoleSystem> roleSystems = new ArrayList<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Community community = (Community) o;
+        return Objects.equals(id, community.id);
+    }
 }

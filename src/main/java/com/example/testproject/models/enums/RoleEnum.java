@@ -1,17 +1,17 @@
 package com.example.testproject.models.enums;
 
 public enum RoleEnum {
-    USER, MODER, ADMIN, GOD;
+    ROLE_USER, ROLE_MODER, ROLE_ADMIN, ROLE_GOD;
 
     public boolean canAssign(RoleEnum role) {
         switch (this) {
-            case GOD:
+            case ROLE_GOD:
                 return true;
-            case ADMIN:
-                return role == MODER;
-            case MODER:
+            case ROLE_ADMIN:
+                return role == ROLE_MODER;
+            case ROLE_MODER:
                 return false;
-            case USER:
+            case ROLE_USER:
             default:
                 return false;
         }
@@ -19,13 +19,13 @@ public enum RoleEnum {
 
     public boolean canRevoke(RoleEnum role) {
         switch (this) {
-            case GOD:
+            case ROLE_GOD:
                 return true;
-            case ADMIN:
-                return role == MODER;
-            case MODER:
+            case ROLE_ADMIN:
+                return role == ROLE_MODER;
+            case ROLE_MODER:
                 return false;
-            case USER:
+            case ROLE_USER:
             default:
                 return false;
         }

@@ -8,23 +8,14 @@ import com.example.testproject.models.models.Dto.CommentaryDto;
 import com.example.testproject.models.entities.User;
 import com.example.testproject.models.enums.RoleEnum;
 import com.example.testproject.repositories.CommentaryRepository;
-import com.example.testproject.repositories.PostRepository;
-import com.example.testproject.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

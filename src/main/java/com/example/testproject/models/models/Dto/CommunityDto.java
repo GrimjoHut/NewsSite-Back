@@ -15,7 +15,7 @@ public class CommunityDto {
         return CommunityDto
                 .builder()
                 .avatar(ImageDto.mapFromEntity(community.getAvatar()))
-                .name(community.getName())
+                .name(community.getName());
     }
 
     public static CommunityDto mapFromEntitySimplified(Community community){
