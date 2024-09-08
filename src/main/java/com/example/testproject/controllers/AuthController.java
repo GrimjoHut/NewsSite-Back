@@ -1,6 +1,6 @@
 package com.example.testproject.controllers;
 
-import com.example.testproject.models.models.Dto.LoginDto;
+import com.example.testproject.models.models.requests.LoginRequest;
 import com.example.testproject.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,18 +15,18 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/registration")
-    public ResponseEntity<String> createNewUser(@RequestBody LoginDto loginDTO){
-        userService.createUser(loginDTO);
+    public ResponseEntity<String> createNewUser(@RequestBody LoginRequest loginRequest){
+        userService.createUser(loginRequest);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body("Please check your email for verification code");
     }
 
     @PostMapping("/login")
-    public ResponseEntity<JWTResponse> login(@RequestBody LoginDto loginDTO){
+    public ResponseEntity<JWTResponse> login(@RequestBody LoginRequest loginRequest){
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userService.login(loginDTO));
+                .body(userService.login(loginRequest));
     }
 
     @PostMapping("/logout")

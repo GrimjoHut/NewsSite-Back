@@ -45,7 +45,6 @@ public class PostService {
         return postRepository.findById(id).orElseThrow(PostNotFoundException::new);
     }
 
-
     // Метод для получения постов по конкретному паблику
     public Page<Post> getPublishedPostsByCommunity(Long communityId, Pageable pageable) {
         Page<Post> posts = postRepository.findByCommunityIdAndStatusOrderByCreatedDateDesc(communityId, StatusEnum.PUBLISHED, pageable);
@@ -59,6 +58,11 @@ public class PostService {
                 .collect(Collectors.toList());
 
         Page<Post> posts = postRepository.findByCommunityIdInAndStatusOrderByCreatedDateDesc(communityIds, StatusEnum.PUBLISHED, pageable);
+        return posts;
+    }
+
+    public Page<Post> getReportedPosts(Pageable pageable){
+        Page<Post> posts = postRepository.findByReportsWithUnconsidered(pageable);
         return posts;
     }
 

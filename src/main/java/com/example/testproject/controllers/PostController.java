@@ -35,6 +35,7 @@ public class PostController {
                         .map(PostDto::mapFromEntitySimplified));
     }
 
+
     @GetMapping("/postsBySubscriptions")
     public ResponseEntity<Page<PostDto>> getPostsBySubscriptions(
             @PageableDefault Pageable pageable,
@@ -45,6 +46,18 @@ public class PostController {
                         .getPostsForSubscribedCommunities(userDetails, pageable)
                         .map(PostDto::mapFromEntitySimplified));
     }
+
+    @Secured("ROLE_MODER")
+    @GetMapping("/postsReported")
+    public ResponseEntity<Page<PostDto>> getReportedPosts(
+            @PageableDefault Pageable pageable){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(postService
+                        .getReportedPosts(pageable)
+                        .map(PostDto::mapFromEntitySimplified));
+    }
+
 
     @GetMapping("/postsRequested")
     public ResponseEntity<Page<PostDto>> getRequestedCommunityPosts(@PageableDefault Pageable pageable,
@@ -77,11 +90,10 @@ public class PostController {
     @Secured("ROLE_USER")
     @AdminInCommunity
     @PutMapping("/acceptCommunityPost")
-    public ResponseEntity<PostDto> acceptCommunityPostRequest(Long postId){
+    public ResponseEntity<Post> acceptCommunityPostRequest(Long postId){
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(PostDto
-                        .mapFromEntity(postService.acceptCommunityPost(postId)));
+                .body(postService.acceptCommunityPost(postId));
     }
 
     @Secured("ROLE_USER")
@@ -95,6 +107,7 @@ public class PostController {
     }
 
     @Secured("ROLE_USER")
+    @AdminInCommunity
     @DeleteMapping("/post")
     public ResponseEntity<?> deletePost(@RequestParam Long id) {
         postService.deletePost(id);

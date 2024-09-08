@@ -50,5 +50,9 @@ public class Post {
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinColumn(name = "community_id")
     private Community community;
+
+    @Column
+    @OneToMany(mappedBy = "post", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
+    private List<Report> reports = new ArrayList<>();
 }
 

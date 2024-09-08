@@ -5,6 +5,7 @@ import com.example.testproject.models.enums.StatusEnum;
 import com.example.testproject.models.models.Dto.PostDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import org.springframework.data.domain.Pageable;
@@ -17,4 +18,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByCommunityIdAndStatusOrderByCreatedDateDesc(Long communityId, StatusEnum status, Pageable pageable);
 
     Page<Post> findByCommunityIdInAndStatusOrderByCreatedDateDesc(List<Long> communityIds, StatusEnum status, Pageable pageable);
+
+    @Query("SELECT p FROM Post p WHERE p.reports IS NOT EMPTY AND EXISTS (SELECT r FROM Report r WHERE r.post = p AND r.considered = false)")
+    Page<Post> findByReportsWithUnconsidered(Pageable pageable);
+
 }

@@ -30,7 +30,6 @@ public class UserDto {
     public static UserDto mapFromEntity (User user){
         return basicMapping(user)
                 .email(user.getEmail())
-                .avatar(ImageDto.mapFromEntity(user.getAvatar()))
                 .build();
     }
 }

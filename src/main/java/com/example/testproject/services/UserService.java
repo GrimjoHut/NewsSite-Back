@@ -3,14 +3,15 @@ package com.example.testproject.services;
 import com.example.testproject.Security.CustomUserDetails;
 import com.example.testproject.exceptions.custom.UserNotFoundException;
 import com.example.testproject.exceptions.custom.WrongAuthorizationParametrsRequest;
-import com.example.testproject.models.entities.File;
 import com.example.testproject.models.entities.Image;
-import com.example.testproject.models.models.Dto.LoginDto;
+import com.example.testproject.models.models.requests.LoginRequest;
 import com.example.testproject.models.entities.User;
 import com.example.testproject.models.enums.RoleEnum;
 import com.example.testproject.repositories.UserRepository;
 import com.example.testproject.utils.JWTUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,13 +41,17 @@ public class UserService {
                 .orElseThrow(UserNotFoundException::new);
     }
 
-    public void createUser(LoginDto loginDTO) {
-        if (userRepository.findByNickname(loginDTO.getNickname()).isPresent())
+    public Page<User> findByCommunity(Long communityId, Pageable pageable){
+        return userRepository.findBySubscribesId(communityId, pageable);
+    }
+
+    public void createUser(LoginRequest loginRequest) {
+        if (userRepository.findByNickname(loginRequest.getNickname()).isPresent())
             throw new WrongAuthorizationParametrsRequest();
         User user = new User();
-        user.setNickname(loginDTO.getNickname());
-        user.setPassword(passwordEncoder.encode(loginDTO.getPassword()));
-        user.setEmail(loginDTO.getEmail());
+        user.setNickname(loginRequest.getNickname());
+        user.setPassword(passwordEncoder.encode(loginRequest.getPassword()));
+        user.setEmail(loginRequest.getEmail());
         String token = verificationTokenService.createVerificationToken(user);
         mailSender.sendVerifyCode(user, token);
         userRepository.save(user);
@@ -56,9 +61,9 @@ public class UserService {
         verificationTokenService.validateVerificationToken(token);
     }
 
-    public JWTResponse login(LoginDto loginDTO) {
-        User user = this.findByNickname(loginDTO.getNickname());
-        if (passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
+    public JWTResponse login(LoginRequest loginRequest) {
+        User user = this.findByNickname(loginRequest.getNickname());
+        if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             String token = JWTUtil.generateToken(user.getNickname());
             return new JWTResponse(token);
         } else {
