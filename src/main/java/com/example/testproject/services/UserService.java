@@ -1,6 +1,7 @@
 package com.example.testproject.services;
 
 import com.example.testproject.Security.CustomUserDetails;
+import com.example.testproject.exceptions.custom.PermissionNotAllowed;
 import com.example.testproject.exceptions.custom.UserNotFoundException;
 import com.example.testproject.exceptions.custom.WrongAuthorizationParametrsRequest;
 import com.example.testproject.models.entities.Image;
@@ -84,30 +85,24 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public ResponseEntity<String> giveRole(String actingUserNickname, String targetUserNickname, RoleEnum role) {
-        Optional<User> actingUserOpt = userRepository.findByNickname(actingUserNickname);
-        Optional<User> targetUserOpt = userRepository.findByNickname(targetUserNickname);
+    public ResponseEntity<String> giveRole(CustomUserDetails userDetails,
+                                           Long userId,
+                                           RoleEnum role) {
+        User targetUser = this.findById(userId);
+        User actingUser = userDetails.getUser();
 
-        if (actingUserOpt.isPresent() && targetUserOpt.isPresent()) {
-            User actingUser = actingUserOpt.get();
-            User targetUser = targetUserOpt.get();
+        if (!actingUser.getRoles().stream().anyMatch(r -> r.canAssign(role)))
+            throw new PermissionNotAllowed();
 
-            if (!actingUser.getRoles().stream().anyMatch(r -> r.canAssign(role))) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You don't have permission to assign this role");
-            }
-
-            if (targetUser.getRoles().contains(role)) {
-                return ResponseEntity.status(HttpStatus.OK).body("User already has this role");
-            } else {
-                targetUser.getRoles().add(role);
-                if (role == RoleEnum.ROLE_ADMIN && !targetUser.getRoles().contains(RoleEnum.ROLE_MODER)) {
-                    targetUser.getRoles().add(RoleEnum.ROLE_MODER);
-                }
-                userRepository.save(targetUser);
-                return ResponseEntity.status(HttpStatus.OK).body("Role was given");
-            }
+        if (targetUser.getRoles().contains(role)) {
+            return ResponseEntity.status(HttpStatus.OK).body("User already has this role");
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            targetUser.getRoles().add(role);
+            if (role == RoleEnum.ROLE_ADMIN && !targetUser.getRoles().contains(RoleEnum.ROLE_MODER)) {
+                targetUser.getRoles().add(RoleEnum.ROLE_MODER);
+            }
+            userRepository.save(targetUser);
+            return ResponseEntity.status(HttpStatus.OK).body("Role was given");
         }
     }
 

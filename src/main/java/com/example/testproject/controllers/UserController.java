@@ -57,8 +57,11 @@ public class UserController {
 
     @Secured("ROLE_ADMIN")
     @PutMapping("/giveRole")
-    public ResponseEntity<String> giveRole(@RequestParam String actingUser, @RequestParam String nickname, @RequestParam RoleEnum role) {
-        return userService.giveRole(actingUser, nickname, role);
+    public ResponseEntity<String> giveRole(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                           @RequestParam Long userId,
+                                           @RequestParam RoleEnum role) {
+        userService.giveRole(userDetails, userId, role);
+        return ResponseEntity.ok("role Added");
     }
 
     @Secured("ROLE_ADMIN")
