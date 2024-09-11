@@ -9,9 +9,10 @@ import lombok.Setter;
 import javax.management.relation.Role;
 import java.util.Set;
 
-@Entity(name = "role_system")
+@Entity
 @Getter
 @Setter
+@Table(name = "role_system")
 @NoArgsConstructor
 public class RoleSystem {
     @Id

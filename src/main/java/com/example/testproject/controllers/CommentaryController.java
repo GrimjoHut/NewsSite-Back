@@ -5,9 +5,12 @@ import com.example.testproject.models.entities.Commentary;
 import com.example.testproject.models.models.Dto.CommentaryDto;
 import com.example.testproject.models.models.requests.CommentaryRequest;
 import com.example.testproject.services.CommentaryService;
+import com.example.testproject.specifications.CommentarySpecification;
+import jakarta.persistence.Lob;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,40 +27,48 @@ public class CommentaryController {
     private final CommentaryService commentaryService;
 
     @GetMapping("/commentariesToPost/{id}")
-    public ResponseEntity<Page<CommentaryDto>> getCommentaries(@PageableDefault Pageable pageable,
-                                                              @RequestParam Long post_id){
+    public ResponseEntity<Page<CommentaryDto>> getCommentaries(
+            @PageableDefault Pageable pageable,
+            @RequestParam(required = false) Long postId,
+            @RequestParam(required = false) Long commId){
+        Specification<Commentary> spec = Specification.where(
+                CommentarySpecification.toPost(postId)
+                .and(CommentarySpecification.toCommentary(commId)));
+        Page<Commentary> commentaries = commentaryService.getCommentaries(spec, pageable);
+        Page<CommentaryDto> commentaryDtos = commentaries.map(CommentaryDto::mapFromEntity);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(commentaryService
-                        .getCommentaries(pageable, post_id)
-                        .map(CommentaryDto::mapFromEntity));
+                .body(commentaryDtos);
     }
 
     @Secured("ROLE_USER")
     @PostMapping("/createComment")
-    public ResponseEntity<Commentary> createComment(@RequestBody CommentaryRequest commentaryRequest,
-                                                    @RequestParam Long post_id,
+    public ResponseEntity<CommentaryDto> createComment(@RequestBody CommentaryRequest commentaryRequest,
                                                     @AuthenticationPrincipal CustomUserDetails userDetails){
+        Commentary commentary = commentaryService.createComment(commentaryRequest, userDetails);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(commentaryService
-                        .createComment(commentaryRequest, post_id, userDetails));
+                .body(CommentaryDto.mapFromEntity(commentary));
     }
 
     @Secured("ROLE_USER")
     @PutMapping("/changeComment/{id}")
-    public ResponseEntity<String> changeComment(@RequestParam String text,
+    public ResponseEntity<CommentaryDto> changeComment(@RequestParam String text,
                                         @RequestParam Long comment_id,
                                         @AuthenticationPrincipal CustomUserDetails userDetails){
-        commentaryService.changeComment(comment_id, userDetails, text);
-        return ResponseEntity.ok("Comment changed");
+        Commentary commentary = commentaryService.changeComment(comment_id, userDetails, text);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(CommentaryDto.mapFromEntity(commentary));
     }
 
     @Secured("ROLE_USER")
     @DeleteMapping("/deleteComment")
-    public ResponseEntity deleteComment(@RequestParam Long commId,
+    public ResponseEntity<CommentaryDto> deleteComment(@RequestParam Long commId,
                                         @AuthenticationPrincipal CustomUserDetails userDetails){
-        commentaryService.deleteComment(commId, userDetails);
-        return ResponseEntity.ok("Commentary deleted");
+        Commentary commentary = commentaryService.deleteComment(commId, userDetails);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(CommentaryDto.mapFromEntity(commentary));
     }
 }

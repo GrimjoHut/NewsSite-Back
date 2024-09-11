@@ -18,6 +18,9 @@ public class User {
     @Column(name = "id")
     private Long id;
 
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
+    private List<Friends> friends = new ArrayList<>();
+
     @Column(name = "nickname", unique = true)
     private String nickname;
 
@@ -27,8 +30,8 @@ public class User {
     @Column(name = "email")
     private String email;
 
-    @Column(name = "avatar")
     @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
+    @JoinColumn(name = "avatar_id")
     private Image avatar;
 
     @Column(name = "enabled", nullable = false)
@@ -55,4 +58,8 @@ public class User {
     @Column(name = "group_roles")
     @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
     private List<RoleSystem> roleSystems = new ArrayList<>();
+
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
+    @JoinColumn(name = "user_board_id")
+    private UserBoard userBoard = new UserBoard(this);
 }

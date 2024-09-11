@@ -2,8 +2,10 @@ package com.example.testproject.controllers;
 
 import com.example.testproject.Security.CustomUserDetails;
 import com.example.testproject.models.entities.User;
+import com.example.testproject.models.enums.FriendStatusEnum;
 import com.example.testproject.models.enums.RoleEnum;
 import com.example.testproject.models.models.Dto.UserDto;
+import com.example.testproject.models.models.requests.LoginRequest;
 import com.example.testproject.services.CustomUserDetailsService;
 import com.example.testproject.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,13 @@ public class UserController {
                         .mapFromEntity(userService.findById(id)));
     }
 
+    @GetMapping("/verify")
+    public ResponseEntity<UserDto> verifyAccount(@RequestParam("token") String token) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(UserDto.mapFromEntity(userService.verifyUser(token)));
+    }
+
     @Secured("ROLE_USER")
     @GetMapping("/subscribers")
     public ResponseEntity<Page<UserDto>> subscribersToCommunity(@RequestParam Long communityId,
@@ -46,27 +55,35 @@ public class UserController {
     }
 
     @Secured("ROLE_USER")
-    @PostMapping(value = "/newRequest", consumes = {"multipart/form-data"})
-    public ResponseEntity<String> changeAvatar(@RequestPart("files") MultipartFile file,
+    @PutMapping(value = "/newRequest", consumes = {"multipart/form-data"})
+    public ResponseEntity<UserDto> changeAvatar(@RequestPart("files") MultipartFile file,
                                                @AuthenticationPrincipal CustomUserDetails userDetails){
-        userService.changeAvatar(file, userDetails);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body("Avatar changed");
+                .body(UserDto.mapFromEntity(
+                        userService.changeAvatar(file, userDetails)
+                ));
     }
 
     @Secured("ROLE_ADMIN")
     @PutMapping("/giveRole")
-    public ResponseEntity<String> giveRole(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public ResponseEntity<UserDto> giveRole(@AuthenticationPrincipal CustomUserDetails userDetails,
                                            @RequestParam Long userId,
                                            @RequestParam RoleEnum role) {
-        userService.giveRole(userDetails, userId, role);
-        return ResponseEntity.ok("role Added");
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(UserDto.mapFromEntity
+                        (userService.giveRole(userDetails, userId, role)));
     }
 
     @Secured("ROLE_ADMIN")
     @PutMapping("/takeRole")
-    public ResponseEntity<String> takeRole(@RequestParam String actingUser, @RequestParam String nickname, @RequestParam RoleEnum role) {
-        return userService.takeRole(actingUser, nickname, role);
+    public ResponseEntity<UserDto> takeRole(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                           @RequestParam Long userId,
+                                           @RequestParam RoleEnum role) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(UserDto.mapFromEntity
+                        (userService.takeRole(userDetails, userId, role)));
     }
 }

@@ -1,13 +1,18 @@
 package com.example.testproject.services;
 
 import com.example.testproject.Security.CustomUserDetails;
-import com.example.testproject.exceptions.custom.PermissionNotAllowed;
+import com.example.testproject.exceptions.GeneralException;
+import com.example.testproject.exceptions.custom.PermissionNotAllowedException;
 import com.example.testproject.exceptions.custom.UserNotFoundException;
 import com.example.testproject.exceptions.custom.WrongAuthorizationParametrsRequest;
+import com.example.testproject.models.entities.Friends;
 import com.example.testproject.models.entities.Image;
+import com.example.testproject.models.enums.FriendStatusEnum;
+import com.example.testproject.models.enums.StatusEnum;
 import com.example.testproject.models.models.requests.LoginRequest;
 import com.example.testproject.models.entities.User;
 import com.example.testproject.models.enums.RoleEnum;
+import com.example.testproject.repositories.PostRepository;
 import com.example.testproject.repositories.UserRepository;
 import com.example.testproject.utils.JWTUtil;
 import lombok.RequiredArgsConstructor;
@@ -27,52 +32,36 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final VerificationTokenService verificationTokenService;
     private final ImageService imageService;
-    private final EmailSenderService mailSender;
 
     public User findById(Long id){
         return userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new);
     }
 
-    public User findByNickname(String nickname){
-        return userRepository.findByNickname(nickname)
-                .orElseThrow(UserNotFoundException::new);
+    public Optional<User> findByNickname(String nickname){
+        return userRepository.findByNickname(nickname);
+    }
+
+    public void saveUser(User user){
+        userRepository.save(user);
     }
 
     public Page<User> findByCommunity(Long communityId, Pageable pageable){
         return userRepository.findBySubscribesId(communityId, pageable);
     }
 
-    public void createUser(LoginRequest loginRequest) {
-        if (userRepository.findByNickname(loginRequest.getNickname()).isPresent())
-            throw new WrongAuthorizationParametrsRequest();
-        User user = new User();
-        user.setNickname(loginRequest.getNickname());
-        user.setPassword(passwordEncoder.encode(loginRequest.getPassword()));
-        user.setEmail(loginRequest.getEmail());
-        String token = verificationTokenService.createVerificationToken(user);
-        mailSender.sendVerifyCode(user, token);
+    public User verifyUser(String token){
+        User user = verificationTokenService.validateVerificationToken(token);
+        user.setEnabled(true);
+        user.getRoles().add(RoleEnum.ROLE_USER);
         userRepository.save(user);
+        return user;
     }
 
-    public void verifyUser(String token){
-        verificationTokenService.validateVerificationToken(token);
-    }
 
-    public JWTResponse login(LoginRequest loginRequest) {
-        User user = this.findByNickname(loginRequest.getNickname());
-        if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            String token = JWTUtil.generateToken(user.getNickname());
-            return new JWTResponse(token);
-        } else {
-            throw new WrongAuthorizationParametrsRequest();
-        }
-    }
-
-    public void changeAvatar(MultipartFile file, CustomUserDetails userDetails){
+    public User changeAvatar(MultipartFile file, CustomUserDetails userDetails){
         User user = userDetails.getUser();
         try {
             Image image = imageService.uploadImage(file, "image-bucket");
@@ -83,54 +72,48 @@ public class UserService {
             e.printStackTrace();
         }
         userRepository.save(user);
+        return user;
     }
 
-    public ResponseEntity<String> giveRole(CustomUserDetails userDetails,
+    public User giveRole(CustomUserDetails userDetails,
                                            Long userId,
                                            RoleEnum role) {
         User targetUser = this.findById(userId);
         User actingUser = userDetails.getUser();
 
         if (!actingUser.getRoles().stream().anyMatch(r -> r.canAssign(role)))
-            throw new PermissionNotAllowed();
+            throw new PermissionNotAllowedException();
 
         if (targetUser.getRoles().contains(role)) {
-            return ResponseEntity.status(HttpStatus.OK).body("User already has this role");
+            throw new GeneralException(400, "User already has this role");
         } else {
             targetUser.getRoles().add(role);
             if (role == RoleEnum.ROLE_ADMIN && !targetUser.getRoles().contains(RoleEnum.ROLE_MODER)) {
                 targetUser.getRoles().add(RoleEnum.ROLE_MODER);
             }
             userRepository.save(targetUser);
-            return ResponseEntity.status(HttpStatus.OK).body("Role was given");
+            return targetUser;
         }
     }
 
-    public ResponseEntity<String> takeRole(String actingUserNickname, String targetUserNickname, RoleEnum role) {
-        Optional<User> actingUserOpt = userRepository.findByNickname(actingUserNickname);
-        Optional<User> targetUserOpt = userRepository.findByNickname(targetUserNickname);
-
-        if (actingUserOpt.isPresent() && targetUserOpt.isPresent()) {
-            User actingUser = actingUserOpt.get();
-            User targetUser = targetUserOpt.get();
+    public User takeRole(CustomUserDetails userDetails,
+                         Long userId,
+                         RoleEnum role) {
+        User targetUser = this.findById(userId);
+        User actingUser = userDetails.getUser();
 
             if (!actingUser.getRoles().stream().anyMatch(r -> r.canRevoke(role))) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You don't have permission to revoke this role");
+                throw new PermissionNotAllowedException();
             }
-
             if (!targetUser.getRoles().contains(role)) {
-                return ResponseEntity.status(HttpStatus.OK).body("User doesn't have this role");
+                throw new GeneralException(400, "User doesnt have this role");
             } else {
                 targetUser.getRoles().remove(role);
                 if (role == RoleEnum.ROLE_MODER && targetUser.getRoles().contains(RoleEnum.ROLE_ADMIN)) {
                     targetUser.getRoles().remove(RoleEnum.ROLE_ADMIN);
                 }
                 userRepository.save(targetUser);
-                return ResponseEntity.status(HttpStatus.OK).body("Role was taken");
+                return targetUser;
             }
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        }
     }
-
 }

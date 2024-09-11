@@ -27,7 +27,7 @@ public class LikesService {
         return likeJPQLRes;
     }
 
-    public void like(Long postId, Long commId, LikesEnum reaction, Long userId) {
+    public Likes like(Long postId, Long commId, LikesEnum reaction, Long userId) {
         if ((postId != null && commId != null) || (postId == null && commId == null))
             throw new LikeSearchInvalidParametrs();
 
@@ -49,6 +49,7 @@ public class LikesService {
         like.setUser(user);
         like.setReaction(reaction);
 
-        likesRepository.save(like);  // Сохраняем или обновляем лайк
+        likesRepository.save(like);
+        return like;// Сохраняем или обновляем лайк
     }
 }

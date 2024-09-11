@@ -1,12 +1,12 @@
 package com.example.testproject.models.entities;
 
+import com.example.testproject.models.enums.CommentPermissionEnum;
 import com.example.testproject.models.enums.StatusEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.*;
 
@@ -25,8 +25,11 @@ public class Post {
     @Enumerated(EnumType.STRING)
     private StatusEnum status;
 
+    @Column(name = "comment_permission")
+    private CommentPermissionEnum commentaryPermission = CommentPermissionEnum.EVERYBODY;
+
     @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdDate;
+    private OffsetDateTime createdDate = OffsetDateTime.now();
 
     @Column(name = "header")
     private String header;
@@ -49,10 +52,14 @@ public class Post {
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinColumn(name = "community_id")
-    private Community community;
+    private Community community = null;
 
     @Column
     @OneToMany(mappedBy = "post", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
     private List<Report> reports = new ArrayList<>();
+
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+    @JoinColumn(name = "user_board_id")
+    private UserBoard userBoard;
 }
 

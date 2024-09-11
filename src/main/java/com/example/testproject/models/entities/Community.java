@@ -25,8 +25,8 @@ public class Community {
     @Column(name = "descripton")
     private String description;
 
-    @Column(name = "avatar")
     @OneToOne(mappedBy = "community", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
+    @JoinColumn(name = "avatar_id")
     private Image avatar;
 
     @Column

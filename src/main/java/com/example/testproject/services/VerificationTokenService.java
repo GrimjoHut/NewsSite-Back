@@ -1,5 +1,6 @@
 package com.example.testproject.services;
 
+import com.example.testproject.exceptions.GeneralException;
 import com.example.testproject.exceptions.custom.VerificationTokenNotFoundException;
 import com.example.testproject.models.entities.User;
 import com.example.testproject.models.entities.VerificationToken;
@@ -35,17 +36,13 @@ public class VerificationTokenService {
         return token;
     }
 
-    public boolean validateVerificationToken(String token) {
+    public User validateVerificationToken(String token) {
         VerificationToken verificationToken = this.findByToken(token);
         if (verificationToken == null || verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            return false;
+            throw new GeneralException(400, "Bad token");
         }
-        User user = verificationToken.getUser();
-        user.setEnabled(true);
-        user.getRoles().add(RoleEnum.ROLE_USER);
-        userRepository.save(user);
         tokenRepository.delete(verificationToken);
         userRepository.flush();
-        return true;
+        return verificationToken.getUser();
     }
 }

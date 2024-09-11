@@ -1,6 +1,7 @@
 package com.example.testproject.controllers;
 
 import com.example.testproject.Security.CustomUserDetails;
+import com.example.testproject.models.entities.Community;
 import com.example.testproject.models.models.Dto.CommunityDto;
 import com.example.testproject.models.models.requests.CommunityRequest;
 import com.example.testproject.services.CommunityService;
@@ -24,14 +25,12 @@ public class CommunityController {
 
     @Secured("ROLE_USER")
     @PostMapping(value = "/newPublic", consumes = {"multipart/form-data"})
-    public ResponseEntity<CommunityDto> createCommunity(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                        @RequestBody CommunityRequest communityRequest,
-                                                        @RequestPart MultipartFile file){
+    public ResponseEntity<Community> createCommunity(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                     @RequestBody CommunityRequest communityRequest,
+                                                     @RequestPart MultipartFile file){
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(CommunityDto
-                        .mapFromEntity(communityService
-                                .createCommunity(communityRequest, userDetails, file)));
+                .body((communityService.createCommunity(communityRequest, userDetails, file)));
     }
 
     @Secured("ROLE_USER")
@@ -43,7 +42,7 @@ public class CommunityController {
     }
 
     @Secured("ROLE_USER")
-    @PutMapping("/subscribe")
+    @PutMapping("/unsubscribe")
     public ResponseEntity<String> unsubscribeToCommunity(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                        @RequestParam Long communityId){
         communityService.unsubscribeFromCommunity(communityId, userDetails);

@@ -7,5 +7,4 @@ import lombok.Data;
 public class CommunityRequest {
     private String name;
     private String description;
-
 }

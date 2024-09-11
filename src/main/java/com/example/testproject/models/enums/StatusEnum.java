@@ -1,5 +1,5 @@
 package com.example.testproject.models.enums;
 
 public enum StatusEnum {
-    PUBLISHED, REQUESTED, DELETED
+    PUBLISHED, REQUESTED, DELETED, DECLINED
 }

@@ -7,9 +7,10 @@ import lombok.Setter;
 
 import java.time.OffsetDateTime;
 
-@Entity(name = "report")
+@Entity
 @Getter
 @Setter
+@Table(name = "report")
 public class Report {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

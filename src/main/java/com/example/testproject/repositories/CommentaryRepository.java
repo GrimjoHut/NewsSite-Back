@@ -3,6 +3,7 @@ package com.example.testproject.repositories;
 import com.example.testproject.models.entities.Commentary;
 import com.example.testproject.models.entities.Post;
 import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,4 +14,6 @@ import java.util.List;
 public interface CommentaryRepository extends JpaRepository<Commentary, Long> {
 
     Page<Commentary> findByPostOrderByCreatedDateDesc(Pageable pageable, Post post);
+
+    Page<Commentary> findAll(Specification<Commentary> spec, Pageable pageable);
 }
